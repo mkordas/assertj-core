@@ -12,24 +12,20 @@
  */
 package org.assertj.core.api.path;
 
+import static org.mockito.Mockito.verify;
+
 import org.assertj.core.api.PathAssert;
 import org.assertj.core.api.PathAssertBaseTest;
 
-import static org.mockito.Mockito.verify;
+public class PathAssert_isAbsolute_Test extends PathAssertBaseTest {
 
-public class PathAssert_isAbsolute_Test
-    extends PathAssertBaseTest
-{
-    @Override
-    protected PathAssert invoke_api_method()
-    {
-        return assertions.isAbsolute();
-    }
+  @Override
+  protected PathAssert invoke_api_method() {
+	return assertions.isAbsolute();
+  }
 
-    @Override
-    protected void verify_internal_effects()
-    {
-        verify(paths).assertIsAbsolute(getInfo(assertions),
-            getActual(assertions));
-    }
+  @Override
+  protected void verify_internal_effects() {
+	verify(paths).assertIsAbsolute(getInfo(assertions), getActual(assertions));
+  }
 }

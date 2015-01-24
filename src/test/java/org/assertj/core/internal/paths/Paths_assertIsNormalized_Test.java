@@ -12,12 +12,6 @@
  */
 package org.assertj.core.internal.paths;
 
-import org.assertj.core.internal.PathsBaseTest;
-import org.junit.Before;
-import org.junit.Test;
-
-import java.nio.file.Path;
-
 import static org.assertj.core.error.ShouldBeNormalized.shouldBeNormalized;
 import static org.assertj.core.test.TestFailures.wasExpectingAssertionError;
 import static org.assertj.core.util.FailureMessages.actualIsNull;
@@ -25,43 +19,34 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@SuppressWarnings("AutoBoxing")
-public class Paths_assertIsNormalized_Test
-    extends PathsBaseTest
-{
-    private Path actual;
+import java.nio.file.Path;
 
-    @Before
-    public void init()
-    {
-        actual = mock(Path.class);
-    }
+import org.junit.Test;
 
-    @Test
-    public void should_fail_if_actual_is_null()
-    {
-        thrown.expectAssertionError(actualIsNull());
-        paths.assertIsNormalized(info, null);
-    }
+public class Paths_assertIsNormalized_Test extends MockPathsBaseTest {
 
-    @Test
-    public void should_fail_if_actual_is_not_normalized()
-    {
-        when(actual.normalize()).thenReturn(mock(Path.class));
+  @Test
+  public void should_fail_if_actual_is_null() {
+	thrown.expectAssertionError(actualIsNull());
+	paths.assertIsNormalized(info, null);
+  }
 
-        try {
-            paths.assertIsNormalized(info, actual);
-            wasExpectingAssertionError();
-        } catch (AssertionError e) {
-            verify(failures).failure(info, shouldBeNormalized(actual));
-        }
-    }
+  @Test
+  public void should_fail_if_actual_is_not_normalized() {
+	when(actual.normalize()).thenReturn(mock(Path.class));
 
-    @Test
-    public void should_pass_if_actual_is_normalized()
-    {
-        when(actual.normalize()).thenReturn(actual);
+	try {
+	  paths.assertIsNormalized(info, actual);
+	  wasExpectingAssertionError();
+	} catch (AssertionError e) {
+	  verify(failures).failure(info, shouldBeNormalized(actual));
+	}
+  }
 
-        paths.assertIsNormalized(info, actual);
-    }
+  @Test
+  public void should_pass_if_actual_is_normalized() {
+	when(actual.normalize()).thenReturn(actual);
+
+	paths.assertIsNormalized(info, actual);
+  }
 }

@@ -18,36 +18,36 @@ import java.io.File;
 import java.nio.file.Path;
 
 /**
- * Creates an error message indicating that an assertion that verifies that a
- * {@link File} or {@link Path} exists failed.
+ * Creates an error message indicating that an assertion that verifies that a {@link File} or {@link Path} exists
+ * failed.
  * 
  * @author Yvonne Wang
  */
 public class ShouldExist extends BasicErrorMessageFactory {
 
   @VisibleForTesting
-  public static final String PATH_SHOULD_EXIST
-      = "Expecting path:%n  <%s>%nto exist";
+  public static final String PATH_SHOULD_EXIST = "%nExpecting path:%n  <%s>%nto exist.";
+  public static final String FILE_SHOULD_EXIST = "%nExpecting file:%n  <%s>%nto exist.";
+
   /**
    * Creates a new <code>{@link ShouldExist}</code>.
+   * 
    * @param actual the actual value in the failed assertion.
    * @return the created {@code ErrorMessageFactory}.
    */
   public static ErrorMessageFactory shouldExist(File actual) {
-    return new ShouldExist(actual);
+	return new ShouldExist(actual);
   }
 
-  public static ErrorMessageFactory shouldExist(final Path actual)
-  {
-    return new ShouldExist(actual);
+  public static ErrorMessageFactory shouldExist(final Path actual) {
+	return new ShouldExist(actual);
   }
 
   private ShouldExist(File actual) {
-    super("%nExpecting file:%n  <%s>%nto exist", actual);
+	super(FILE_SHOULD_EXIST, actual);
   }
 
-  private ShouldExist(final Path actual)
-  {
-    super(PATH_SHOULD_EXIST, actual);
+  private ShouldExist(final Path actual) {
+	super(PATH_SHOULD_EXIST, actual);
   }
 }

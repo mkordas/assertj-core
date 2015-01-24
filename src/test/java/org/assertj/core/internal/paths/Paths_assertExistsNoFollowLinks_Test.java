@@ -12,7 +12,7 @@
  */
 package org.assertj.core.internal.paths;
 
-import static org.assertj.core.error.ShouldExist.shouldExist;
+import static org.assertj.core.error.ShouldExistNoFollow.shouldExistNoFollow;
 import static org.assertj.core.test.TestFailures.wasExpectingAssertionError;
 import static org.assertj.core.util.FailureMessages.actualIsNull;
 import static org.mockito.Mockito.verify;
@@ -27,7 +27,7 @@ import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
 
-public class Paths_assertExists_Test extends PathsBaseTest {
+public class Paths_assertExistsNoFollowLinks_Test extends PathsBaseTest {
 
   @ClassRule
   public static FileSystemResource resource = new FileSystemResource();
@@ -39,7 +39,6 @@ public class Paths_assertExists_Test extends PathsBaseTest {
 
   @BeforeClass
   public static void initPaths() throws IOException {
-
 	final FileSystem fs = resource.getFileSystem();
 
 	existing = fs.getPath("/existing");
@@ -56,36 +55,31 @@ public class Paths_assertExists_Test extends PathsBaseTest {
   @Test
   public void should_fail_if_actual_is_null() {
 	thrown.expectAssertionError(actualIsNull());
-	paths.assertExists(info, null);
+	paths.assertExistsNoFollowLinks(info, null);
   }
 
   @Test
   public void should_fail_if_actual_does_not_exist() {
 	try {
-	  paths.assertExists(info, nonExisting);
+	  paths.assertExistsNoFollowLinks(info, nonExisting);
 	  wasExpectingAssertionError();
 	} catch (AssertionError e) {
-	  verify(failures).failure(info, shouldExist(nonExisting));
+	  verify(failures).failure(info, shouldExistNoFollow(nonExisting));
 	}
   }
 
   @Test
-  public void should_fail_if_actual_is_dangling_symlink() {
-	try {
-	  paths.assertExists(info, dangling);
-	  wasExpectingAssertionError();
-	} catch (AssertionError e) {
-	  verify(failures).failure(info, shouldExist(dangling));
-	}
+  public void should_succeed_if_actual_is_dangling_symlink() {
+	paths.assertExistsNoFollowLinks(info, dangling);
   }
 
   @Test
   public void should_pass_if_actual_exists() {
-	paths.assertExists(info, existing);
+	paths.assertExistsNoFollowLinks(info, existing);
   }
 
   @Test
   public void should_pass_if_actual_is_non_dangling_symlink() {
-	paths.assertExists(info, symlink);
+	paths.assertExistsNoFollowLinks(info, symlink);
   }
 }

@@ -10,22 +10,24 @@
  *
  * Copyright 2012-2014 the original author or authors.
  */
-package org.assertj.core.api.path;
+package org.assertj.core.internal.paths;
 
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.mock;
 
-import org.assertj.core.api.PathAssert;
-import org.assertj.core.api.PathAssertBaseTest;
+import java.nio.file.Path;
 
-public class PathAssert_isCanonical_Test extends PathAssertBaseTest {
+import org.assertj.core.internal.PathsBaseTest;
+import org.junit.Before;
 
-  @Override
-  protected PathAssert invoke_api_method() {
-	return assertions.isCanonical();
+public class MockPathsBaseTest extends PathsBaseTest {
+
+  Path actual;
+  Path other;
+
+  @Before
+  public void init() {
+	actual = mock(Path.class);
+	other = mock(Path.class);
   }
 
-  @Override
-  protected void verify_internal_effects() {
-	verify(paths).assertIsCanonical(getInfo(assertions), getActual(assertions));
-  }
 }

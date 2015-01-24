@@ -12,20 +12,8 @@
  */
 package org.assertj.core.internal.paths;
 
-import org.assertj.core.internal.PathsBaseTest;
-import org.assertj.core.util.PathsException;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
-import org.junit.Test;
-
-import java.io.IOException;
-import java.nio.file.FileSystem;
-import java.nio.file.Path;
-
-import static junit.framework.Assert.assertSame;
-import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.fail;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.error.ShouldEndWithPath.shouldEndWith;
 import static org.assertj.core.test.TestFailures.wasExpectingAssertionError;
 import static org.assertj.core.util.FailureMessages.actualIsNull;
@@ -33,115 +21,74 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@SuppressWarnings("AutoBoxing")
-public class Paths_assertEndsWith_Test
-    extends PathsBaseTest
-{
-    @ClassRule
-    public static FileSystemResource resource;
+import java.io.IOException;
+import java.nio.file.Path;
 
-    static {
-        try {
-            resource = new FileSystemResource();
-        } catch (IOException e) {
-            throw new ExceptionInInitializerError(e);
+import org.assertj.core.util.PathsException;
+import org.junit.Test;
 
-        }
-    }
+public class Paths_assertEndsWith_Test extends MockPathsBaseTest {
 
-    public static Path nonExistingActual;
-    public static Path nonExistingParent;
-    public static Path existingActual;
-    public static Path existingGoodParent;
-    public static Path existingBadParent;
+  @Test
+  public void should_fail_if_actual_is_null() {
+	thrown.expectAssertionError(actualIsNull());
+	paths.assertEndsWith(info, null, other);
+  }
 
-    @BeforeClass
-    public static void initPaths()
-    {
-        final FileSystem fs = resource.getFileSystem();
+  @Test
+  public void should_fail_if_other_is_null() {
+	try {
+	  paths.assertEndsWith(info, actual, null);
+	  fail("expected a NullPointerException here");
+	} catch (NullPointerException e) {
+	  assertThat(e).hasMessage("the expected end path should not be null");
+	}
+  }
 
-        nonExistingActual = fs.getPath("/noActual");
-        nonExistingParent = fs.getPath("/noParent");
-    }
+  @Test
+  public void should_fail_with_PathsException_if_actual_cannot_resolve() throws IOException {
+	final IOException exception = new IOException();
+	when(actual.toRealPath()).thenThrow(exception);
 
-    private Path actual;
-    private Path other;
+	try {
+	  paths.assertEndsWith(info, actual, other);
+	  fail("expected a PathsException here");
+	} catch (PathsException e) {
+	  assertThat(e).hasMessage("cannot resolve actual path");
+	  assertThat(e.getCause()).isSameAs(e.getCause());
+	}
+  }
 
-    @Before
-    public void initMocks()
-    {
-        actual = mock(Path.class);
-        other = mock(Path.class);
-    }
+  @Test
+  public void should_fail_if_canonical_actual_does_not_end_with_normalized_other() throws IOException {
+	final Path canonicalActual = mock(Path.class);
+	final Path normalizedOther = mock(Path.class);
 
-    @Test
-    public void should_fail_if_actual_is_null()
-    {
-        thrown.expectAssertionError(actualIsNull());
-        paths.assertEndsWith(info, null, other);
-    }
+	when(actual.toRealPath()).thenReturn(canonicalActual);
+	when(other.normalize()).thenReturn(normalizedOther);
 
-    @Test
-    public void should_fail_if_other_is_null()
-    {
-        try {
-            paths.assertEndsWith(info, actual, null);
-            fail("expected a NullPointerException here");
-        } catch (NullPointerException e) {
-            assertEquals(e.getMessage(), "other should not be null");
-        }
-    }
+	// This is the default, but...
+	when(canonicalActual.endsWith(normalizedOther)).thenReturn(false);
 
-    @Test
-    public void should_fail_with_PathsException_if_actual_cannot_resolve()
-        throws IOException
-    {
-        final IOException exception = new IOException();
-        when(actual.toRealPath()).thenThrow(exception);
+	try {
+	  paths.assertEndsWith(info, actual, other);
+	  wasExpectingAssertionError();
+	} catch (AssertionError e) {
+	  verify(failures).failure(info, shouldEndWith(actual, other));
+	}
+  }
 
-        try {
-            paths.assertEndsWith(info, actual, other);
-            fail("expected a PathsException here");
-        } catch (PathsException e) {
-            assertEquals("cannot resolve actual path", e.getMessage());
-            assertSame(exception, e.getCause());
-        }
-    }
+  @Test
+  public void should_succeed_if_canonical_actual_ends_with_normalized_other() throws IOException {
+	final Path canonicalActual = mock(Path.class);
+	final Path normalizedOther = mock(Path.class);
 
-    @Test
-    public void should_fail_if_canonical_actual_does_not_end_with_normalized_other()
-        throws IOException
-    {
-        final Path canonicalActual = mock(Path.class);
-        final Path normalizedOther = mock(Path.class);
+	when(actual.toRealPath()).thenReturn(canonicalActual);
+	when(other.normalize()).thenReturn(normalizedOther);
 
-        when(actual.toRealPath()).thenReturn(canonicalActual);
-        when(other.normalize()).thenReturn(normalizedOther);
+	// We want the canonical versions to be compared, not the arguments
+	when(canonicalActual.endsWith(normalizedOther)).thenReturn(true);
 
-        // This is the default, but...
-        when(canonicalActual.endsWith(normalizedOther)).thenReturn(false);
-
-        try {
-            paths.assertEndsWith(info, actual, other);
-            wasExpectingAssertionError();
-        } catch (AssertionError e) {
-            verify(failures).failure(info, shouldEndWith(actual, other));
-        }
-    }
-
-    @Test
-    public void should_succeed_if_canonical_actual_ends_with_normalized_other()
-        throws IOException
-    {
-        final Path canonicalActual = mock(Path.class);
-        final Path normalizedOther = mock(Path.class);
-
-        when(actual.toRealPath()).thenReturn(canonicalActual);
-        when(other.normalize()).thenReturn(normalizedOther);
-
-        // We want the canonical versions to be compared, not the arguments
-        when(canonicalActual.endsWith(normalizedOther)).thenReturn(true);
-
-        paths.assertEndsWith(info, actual, other);
-    }
+	paths.assertEndsWith(info, actual, other);
+  }
 }

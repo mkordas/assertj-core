@@ -12,13 +12,6 @@
  */
 package org.assertj.core.internal.paths;
 
-import org.assertj.core.internal.PathsBaseTest;
-import org.junit.Before;
-import org.junit.Test;
-
-import java.io.IOException;
-import java.nio.file.Path;
-
 import static org.assertj.core.error.ShouldHaveNoParent.shouldHaveNoParent;
 import static org.assertj.core.test.TestFailures.wasExpectingAssertionError;
 import static org.assertj.core.util.FailureMessages.actualIsNull;
@@ -26,46 +19,37 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-public class Paths_assertHasNoParentRaw_Test
-    extends PathsBaseTest
-{
-    private Path actual;
+import java.io.IOException;
+import java.nio.file.Path;
 
-    @Before
-    public void init()
-    {
-        actual = mock(Path.class);
-    }
+import org.junit.Test;
 
-    @Test
-    public void should_fail_if_actual_is_null()
-    {
-        thrown.expectAssertionError(actualIsNull());
-        paths.assertHasNoParentRaw(info, null);
-    }
+public class Paths_assertHasNoParentRaw_Test extends MockPathsBaseTest {
 
-    @Test
-    public void should_fail_if_actual_has_parent()
-        throws IOException
-    {
-        final Path parent = mock(Path.class);
-        when(actual.getParent()).thenReturn(parent);
+  @Test
+  public void should_fail_if_actual_is_null() {
+	thrown.expectAssertionError(actualIsNull());
+	paths.assertHasNoParentRaw(info, null);
+  }
 
-        try {
-            paths.assertHasNoParentRaw(info, actual);
-            wasExpectingAssertionError();
-        } catch (AssertionError e) {
-            verify(failures).failure(info, shouldHaveNoParent(actual));
-        }
-    }
+  @Test
+  public void should_fail_if_actual_has_parent() throws IOException {
+	final Path parent = mock(Path.class);
+	when(actual.getParent()).thenReturn(parent);
 
-    @Test
-    public void should_succeed_if_actual_has_no_parent()
-        throws IOException
-    {
-        // This is the default, but let's make that clear
-        when(actual.getParent()).thenReturn(null);
+	try {
+	  paths.assertHasNoParentRaw(info, actual);
+	  wasExpectingAssertionError();
+	} catch (AssertionError e) {
+	  verify(failures).failure(info, shouldHaveNoParent(actual));
+	}
+  }
 
-        paths.assertHasNoParentRaw(info, actual);
-    }
+  @Test
+  public void should_succeed_if_actual_has_no_parent() throws IOException {
+	// This is the default, but let's make that clear
+	when(actual.getParent()).thenReturn(null);
+
+	paths.assertHasNoParentRaw(info, actual);
+  }
 }

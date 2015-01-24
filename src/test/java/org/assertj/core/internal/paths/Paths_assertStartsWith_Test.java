@@ -12,16 +12,7 @@
  */
 package org.assertj.core.internal.paths;
 
-import org.assertj.core.internal.PathsBaseTest;
-import org.assertj.core.util.PathsException;
-import org.junit.Before;
-import org.junit.Test;
-
-import java.io.IOException;
-import java.nio.file.Path;
-
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertSame;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.error.ShouldStartWithPath.shouldStartWith;
 import static org.assertj.core.test.TestFailures.wasExpectingAssertionError;
 import static org.assertj.core.util.FailureMessages.actualIsNull;
@@ -30,103 +21,94 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@SuppressWarnings("AutoBoxing")
-public class Paths_assertStartsWith_Test
-    extends PathsBaseTest
-{
-    private Path actual;
-    private Path canonicalActual;
-    private Path other;
-    private Path canonicalOther;
+import java.io.IOException;
+import java.nio.file.Path;
 
-    @Before
-    public void init()
-    {
-        actual = mock(Path.class);
-        canonicalActual = mock(Path.class);
-        other = mock(Path.class);
-        canonicalOther = mock(Path.class);
-    }
+import org.assertj.core.util.PathsException;
+import org.junit.Before;
+import org.junit.Test;
 
-    @Test
-    public void should_fail_if_actual_is_null()
-    {
-        thrown.expectAssertionError(actualIsNull());
-        paths.assertStartsWith(info, null, other);
-    }
+public class Paths_assertStartsWith_Test extends MockPathsBaseTest {
 
-    @Test
-    public void should_fail_if_other_is_null()
-    {
-        try {
-            paths.assertStartsWith(info, actual, null);
-            fail("expected a NullPointerException here");
-        } catch (NullPointerException e) {
-            assertEquals(e.getMessage(), "other should not be null");
-        }
-    }
+  private Path canonicalActual;
+  private Path canonicalOther;
 
-    @Test
-    public void should_throw_PathsException_if_actual_cannot_be_resolved()
-        throws IOException
-    {
-        final IOException exception = new IOException();
-        when(actual.toRealPath()).thenThrow(exception);
+  @Before
+  public void init() {
+	super.init();
+	canonicalActual = mock(Path.class);
+	canonicalOther = mock(Path.class);
+  }
 
-        try {
-            paths.assertStartsWith(info, actual, other);
-            fail("was expecting a PathsException here");
-        } catch (PathsException e) {
-            assertEquals("failed to resolve actual", e.getMessage());
-            assertSame(exception, e.getCause());
-        }
-    }
+  @Test
+  public void should_fail_if_actual_is_null() {
+	thrown.expectAssertionError(actualIsNull());
+	paths.assertStartsWith(info, null, other);
+  }
 
-    @Test
-    public void should_throw_PathsException_if_other_cannot_be_resolved()
-        throws IOException
-    {
-        final IOException exception = new IOException();
+  @Test
+  public void should_fail_if_other_is_null() {
+	try {
+	  paths.assertStartsWith(info, actual, null);
+	  fail("expected a NullPointerException here");
+	} catch (NullPointerException e) {
+	  assertThat(e).hasMessage("the expected start path should not be null");
+	}
+  }
 
-        when(actual.toRealPath()).thenReturn(canonicalActual);
-        when(other.toRealPath()).thenThrow(exception);
+  @Test
+  public void should_throw_PathsException_if_actual_cannot_be_resolved() throws IOException
+  {
+	final IOException exception = new IOException();
+	when(actual.toRealPath()).thenThrow(exception);
 
-        try {
-            paths.assertStartsWith(info, actual, other);
-            fail("was expecting a PathsException here");
-        } catch (PathsException e) {
-            assertEquals("failed to resolve path argument", e.getMessage());
-            assertSame(exception, e.getCause());
-        }
-    }
+	try {
+	  paths.assertStartsWith(info, actual, other);
+	  fail("was expecting a PathsException here");
+	} catch (PathsException e) {
+	  assertThat(e).hasMessage("failed to resolve actual");
+	  assertThat(e.getCause()).isSameAs(exception);
+	}
+  }
 
-    @Test
-    public void should_fail_if_actual_does_not_start_with_other()
-        throws IOException
-    {
-        when(actual.toRealPath()).thenReturn(canonicalActual);
-        when(other.toRealPath()).thenReturn(canonicalOther);
-        // This is the default, but let's make this explicit
-        when(canonicalActual.startsWith(canonicalOther)).thenReturn(false);
+  @Test
+  public void should_throw_PathsException_if_other_cannot_be_resolved() throws IOException {
+	final IOException exception = new IOException();
+	when(actual.toRealPath()).thenReturn(canonicalActual);
+	when(other.toRealPath()).thenThrow(exception);
 
-        try {
-            paths.assertStartsWith(info, actual, other);
-            wasExpectingAssertionError();
-        } catch (AssertionError e) {
-            verify(failures).failure(info, shouldStartWith(actual, other));
-        }
-    }
+	try {
+	  paths.assertStartsWith(info, actual, other);
+	  fail("was expecting a PathsException here");
+	} catch (PathsException e) {
+	  assertThat(e).hasMessage("failed to resolve path argument");
+	  assertThat(e.getCause()).isSameAs(exception);
+	}
+  }
 
-    @Test
-    public void should_succeed_if_actual_starts_with_other()
-        throws IOException
-    {
-        when(actual.toRealPath()).thenReturn(canonicalActual);
-        when(other.toRealPath()).thenReturn(canonicalOther);
+  @Test
+  public void should_fail_if_actual_does_not_start_with_other() throws IOException {
+	when(actual.toRealPath()).thenReturn(canonicalActual);
+	when(other.toRealPath()).thenReturn(canonicalOther);
+	// This is the default, but let's make this explicit
+	when(canonicalActual.startsWith(canonicalOther)).thenReturn(false);
 
-        when(canonicalActual.startsWith(canonicalOther)).thenReturn(true);
+	try {
+	  paths.assertStartsWith(info, actual, other);
+	  wasExpectingAssertionError();
+	} catch (AssertionError e) {
+	  verify(failures).failure(info, shouldStartWith(actual, other));
+	}
+  }
 
-        paths.assertStartsWith(info, actual, other);
-    }
+  @Test
+  public void should_succeed_if_actual_starts_with_other() throws IOException {
+	when(actual.toRealPath()).thenReturn(canonicalActual);
+	when(other.toRealPath()).thenReturn(canonicalOther);
+
+	when(canonicalActual.startsWith(canonicalOther)).thenReturn(true);
+
+	paths.assertStartsWith(info, actual, other);
+  }
 
 }

@@ -12,29 +12,25 @@
  */
 package org.assertj.core.api.path;
 
-import org.assertj.core.api.PathAssert;
-import org.assertj.core.api.PathAssertBaseTest;
-
-import java.nio.file.Path;
-
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-public class PathAssert_startsWithRaw_Test
-    extends PathAssertBaseTest
-{
-    private final Path other = mock(Path.class);
+import java.nio.file.Path;
 
-    @Override
-    protected PathAssert invoke_api_method()
-    {
-        return assertions.startsWithRaw(other);
-    }
+import org.assertj.core.api.PathAssert;
+import org.assertj.core.api.PathAssertBaseTest;
 
-    @Override
-    protected void verify_internal_effects()
-    {
-        verify(paths).assertStartsWithRaw(getInfo(assertions),
-            getActual(assertions), other);
-    }
+public class PathAssert_startsWithRaw_Test extends PathAssertBaseTest {
+
+  private final Path other = mock(Path.class);
+
+  @Override
+  protected PathAssert invoke_api_method() {
+	return assertions.startsWithRaw(other);
+  }
+
+  @Override
+  protected void verify_internal_effects() {
+	verify(paths).assertStartsWithRaw(getInfo(assertions), getActual(assertions), other);
+  }
 }

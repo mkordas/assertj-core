@@ -20,9 +20,13 @@ import java.io.IOException;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 
+import static java.nio.file.Files.exists;
+import static java.nio.file.Files.isDirectory;
+import static java.nio.file.Files.isRegularFile;
+import static java.nio.file.Files.isSymbolicLink;
+import static java.nio.file.Files.notExists;
 import static org.assertj.core.error.ShouldBeAbsolutePath.shouldBeAbsolutePath;
 import static org.assertj.core.error.ShouldBeCanonicalPath.shouldBeCanonicalPath;
-
 import static org.assertj.core.error.ShouldBeDirectory.shouldBeDirectory;
 import static org.assertj.core.error.ShouldBeNormalized.shouldBeNormalized;
 import static org.assertj.core.error.ShouldBeRegularFile.shouldBeRegularFile;
@@ -40,255 +44,175 @@ import static org.assertj.core.error.ShouldStartWithPath.shouldStartWith;
  */
 public class Paths
 {
-    @VisibleForTesting
-    public static final String IOERROR_FORMAT
-        = "I/O error attempting to process assertion for path: <%s>";
+  @VisibleForTesting
+  public static final String IOERROR_FORMAT = "I/O error attempting to process assertion for path: <%s>";
 
-    private static final Paths INSTANCE = new Paths();
+  private static final Paths INSTANCE = new Paths();
 
-    @VisibleForTesting
-    Failures failures = Failures.instance();
+  @VisibleForTesting
+  Failures failures = Failures.instance();
 
-    public static Paths instance()
-    {
-        return INSTANCE;
-    }
+  public static Paths instance() {
+	return INSTANCE;
+  }
 
-    public void assertExists(final AssertionInfo info, final Path actual)
-    {
-        assertNotNull(info, actual);
+  public void assertExists(final AssertionInfo info, final Path actual) {
+	assertNotNull(info, actual);
+	if (!exists(actual)) throw failures.failure(info, shouldExist(actual));
+  }
 
-        if (!java.nio.file.Files.exists(actual))
-            throw failures.failure(info, shouldExist(actual));
-    }
+  public void assertExistsNoFollowLinks(final AssertionInfo info, final Path actual) {
+	assertNotNull(info, actual);
+	if (!exists(actual, LinkOption.NOFOLLOW_LINKS)) throw failures.failure(info, shouldExistNoFollow(actual));
+  }
 
-    public void assertExistsNoFollowLinks(final AssertionInfo info,
-        final Path actual)
-    {
-        assertNotNull(info, actual);
+  public void assertDoesNotExist(final AssertionInfo info, final Path actual)
+  {
+	assertNotNull(info, actual);
+	if (!notExists(actual, LinkOption.NOFOLLOW_LINKS)) throw failures.failure(info, shouldNotExist(actual));
+  }
 
-        if (!java.nio.file.Files.exists(actual, LinkOption.NOFOLLOW_LINKS))
-            throw failures.failure(info, shouldExistNoFollow(actual));
-    }
+  public void assertIsRegularFile(final AssertionInfo info, final Path actual) {
+	assertExists(info, actual);
+	if (!isRegularFile(actual)) throw failures.failure(info, shouldBeRegularFile(actual));
+  }
 
-    public void assertDoesNotExist(final AssertionInfo info, final Path actual)
-    {
-        assertNotNull(info, actual);
-        if (!java.nio.file.Files.notExists(actual, LinkOption.NOFOLLOW_LINKS))
-            throw failures.failure(info, shouldNotExist(actual));
-    }
+  public void assertIsDirectory(final AssertionInfo info, final Path actual)
+  {
+	assertExists(info, actual);
+	if (!isDirectory(actual)) throw failures.failure(info, shouldBeDirectory(actual));
+  }
 
-    public void assertIsRegularFile(final AssertionInfo info, final Path actual)
-    {
-        assertExists(info, actual);
+  public void assertIsSymbolicLink(final AssertionInfo info, final Path actual) {
+	assertExistsNoFollowLinks(info, actual);
+	if (!isSymbolicLink(actual)) throw failures.failure(info, shouldBeSymbolicLink(actual));
+  }
 
-        if (!java.nio.file.Files.isRegularFile(actual))
-            throw failures.failure(info, shouldBeRegularFile(actual));
-    }
+  public void assertIsAbsolute(final AssertionInfo info, final Path actual) {
+	assertNotNull(info, actual);
+	if (!actual.isAbsolute()) throw failures.failure(info, shouldBeAbsolutePath(actual));
+  }
 
-    public void assertIsDirectory(final AssertionInfo info, final Path actual)
-    {
-        assertExists(info, actual);
+  public void assertIsNormalized(final AssertionInfo info, final Path actual) {
+	assertNotNull(info, actual);
+	if (!actual.normalize().equals(actual)) throw failures.failure(info, shouldBeNormalized(actual));
+  }
 
-        if (!java.nio.file.Files.isDirectory(actual))
-            throw failures.failure(info, shouldBeDirectory(actual));
-    }
+  public void assertIsCanonical(final AssertionInfo info, final Path actual) {
+	assertNotNull(info, actual);
+	try {
+	  if (!actual.equals(actual.toRealPath())) throw failures.failure(info, shouldBeCanonicalPath(actual));
+	} catch (IOException e) {
+	  throw new PathsException(String.format(IOERROR_FORMAT, actual), e);
+	}
+  }
 
-    public void assertIsSymbolicLink(final AssertionInfo info,
-        final Path actual)
-    {
-        assertExistsNoFollowLinks(info, actual);
+  public void assertHasParent(final AssertionInfo info, final Path actual, final Path expected) {
+	assertNotNull(info, actual);
+	checkExpectedParentPathIsNotNull(expected);
 
-        if (!java.nio.file.Files.isSymbolicLink(actual))
-            throw failures.failure(info, shouldBeSymbolicLink(actual));
-    }
+	final Path canonicalActual;
+	try {
+	  canonicalActual = actual.toRealPath();
+	} catch (IOException e) {
+	  throw new PathsException("failed to resolve actual", e);
+	}
 
-    public void assertIsAbsolute(final AssertionInfo info, final Path actual)
-    {
-        assertNotNull(info, actual);
-        if (!actual.isAbsolute())
-            throw failures.failure(info, shouldBeAbsolutePath(actual));
-    }
+	final Path canonicalExpected;
+	try {
+	  canonicalExpected = expected.toRealPath();
+	} catch (IOException e) {
+	  throw new PathsException("failed to resolve path argument", e);
+	}
 
-    public void assertIsNormalized(final AssertionInfo info, final Path actual)
-    {
-        assertNotNull(info, actual);
-        final Path normalized = actual.normalize();
+	final Path actualParent = canonicalActual.getParent();
+	if (actualParent == null) throw failures.failure(info, shouldHaveParent(actual, expected));
+	if (!actualParent.equals(canonicalExpected))
+	  throw failures.failure(info, shouldHaveParent(actual, actualParent, expected));
+  }
 
-        if (!normalized.equals(actual))
-            throw failures.failure(info, shouldBeNormalized(actual));
-    }
+  private static void checkExpectedParentPathIsNotNull(final Path expected) {
+	if (expected == null) throw new NullPointerException("expected parent path should not be null");
+  }
 
-    public void assertIsCanonical(final AssertionInfo info, final Path actual)
-    {
-        assertNotNull(info, actual);
+  public void assertHasParentRaw(final AssertionInfo info, final Path actual, final Path expected) {
+	assertNotNull(info, actual);
+	checkExpectedParentPathIsNotNull(expected);
 
-        final Path realPath;
+	final Path actualParent = actual.getParent();
+	if (actualParent == null) throw failures.failure(info, shouldHaveParent(actual, expected));
+	if (!actualParent.equals(expected))
+	  throw failures.failure(info, shouldHaveParent(actual, actualParent, expected));
+  }
 
-        try {
-            realPath = actual.toRealPath();
-        } catch (IOException e) {
-            throw new PathsException(String.format(IOERROR_FORMAT, actual), e);
-        }
+  public void assertHasNoParent(final AssertionInfo info, final Path actual) {
+	assertNotNull(info, actual);
+	try {
+	  final Path canonicalActual = actual.toRealPath();
+	  if (canonicalActual.getParent() != null) throw failures.failure(info, shouldHaveNoParent(actual));
+	} catch (IOException e) {
+	  throw new PathsException("cannot resolve actual path", e);
+	}
+  }
 
-        if (!actual.equals(realPath))
-            throw failures.failure(info, shouldBeCanonicalPath(actual));
-    }
+  public void assertHasNoParentRaw(final AssertionInfo info, final Path actual) {
+	assertNotNull(info, actual);
+	if (actual.getParent() != null) throw failures.failure(info, shouldHaveNoParent(actual));
+  }
 
-    public void assertHasParent(final AssertionInfo info, final Path actual,
-        final Path expected)
-    {
-        assertNotNull(info, actual);
+  public void assertStartsWith(final AssertionInfo info, final Path actual, final Path start) {
+	assertNotNull(info, actual);
+	assertExpectedStartPathIsNotNull(start);
 
-        if (expected == null)
-            throw new NullPointerException("parent should not be null");
+	final Path canonicalActual;
+	try {
+	  canonicalActual = actual.toRealPath();
+	} catch (IOException e) {
+	  throw new PathsException("failed to resolve actual", e);
+	}
 
-        final Path canonicalActual;
+	final Path canonicalOther;
+	try {
+	  canonicalOther = start.toRealPath();
+	} catch (IOException e) {
+	  throw new PathsException("failed to resolve path argument", e);
+	}
 
-        try {
-            canonicalActual = actual.toRealPath();
-        } catch (IOException e) {
-            throw new PathsException("failed to resolve actual", e);
-        }
+	if (!canonicalActual.startsWith(canonicalOther)) throw failures.failure(info, shouldStartWith(actual, start));
+  }
 
-        final Path canonicalExpected;
+  private static void assertExpectedStartPathIsNotNull(final Path start) {
+	if (start == null) throw new NullPointerException("the expected start path should not be null");
+  }
 
-        try {
-            canonicalExpected = expected.toRealPath();
-        } catch (IOException e) {
-            throw new PathsException("failed to resolve path argument", e);
-        }
+  private static void assertExpectedEndPathIsNotNull(final Path end) {
+	if (end == null) throw new NullPointerException("the expected end path should not be null");
+  }
 
-        final Path actualParent = canonicalActual.getParent();
+  public void assertStartsWithRaw(final AssertionInfo info, final Path actual, final Path other) {
+	assertNotNull(info, actual);
+	assertExpectedStartPathIsNotNull(other);
+	if (!actual.startsWith(other)) throw failures.failure(info, shouldStartWith(actual, other));
+  }
 
-        if (actualParent == null)
-            throw failures.failure(info, shouldHaveParent(actual, expected));
+  public void assertEndsWith(final AssertionInfo info, final Path actual, final Path end) {
+	assertNotNull(info, actual);
+	assertExpectedEndPathIsNotNull(end);
+	try {
+	  final Path canonicalActual = actual.toRealPath();
+	  if (!canonicalActual.endsWith(end.normalize())) throw failures.failure(info, shouldEndWith(actual, end));
+	} catch (IOException e) {
+	  throw new PathsException("cannot resolve actual path", e);
+	}
+  }
 
-        if (!actualParent.equals(canonicalExpected))
-            throw failures.failure(info,
-                shouldHaveParent(actual, actualParent, expected));
-    }
+  public void assertEndsWithRaw(final AssertionInfo info, final Path actual, final Path end) {
+	assertNotNull(info, actual);
+	assertExpectedEndPathIsNotNull(end);
+	if (!actual.endsWith(end)) throw failures.failure(info, shouldEndWith(actual, end));
+  }
 
-    public void assertHasParentRaw(final AssertionInfo info, final Path actual,
-        final Path expected)
-    {
-        assertNotNull(info, actual);
-
-        if (expected == null)
-            throw new NullPointerException("parent should not be null");
-
-        final Path actualParent = actual.getParent();
-
-        if (actualParent == null)
-            throw failures.failure(info, shouldHaveParent(actual, expected));
-
-        if (!actualParent.equals(expected))
-            throw failures.failure(info,
-                shouldHaveParent(actual, actualParent, expected));
-    }
-
-    public void assertHasNoParent(final AssertionInfo info, final Path actual)
-    {
-        assertNotNull(info, actual);
-
-        final Path canonicalActual;
-
-        try {
-            canonicalActual = actual.toRealPath();
-        } catch (IOException e) {
-            throw new PathsException("cannot resolve actual path", e);
-        }
-
-        if (canonicalActual.getParent() != null)
-            throw failures.failure(info, shouldHaveNoParent(actual));
-    }
-
-    public void assertHasNoParentRaw(final AssertionInfo info,
-        final Path actual)
-    {
-        assertNotNull(info, actual);
-
-        if (actual.getParent() != null)
-            throw failures.failure(info, shouldHaveNoParent(actual));
-    }
-
-    public void assertStartsWith(final AssertionInfo info, final Path actual,
-        final Path other)
-    {
-        assertNotNull(info, actual);
-
-        if (other == null)
-            throw new NullPointerException("other should not be null");
-
-        final Path canonicalActual;
-
-        try {
-            canonicalActual = actual.toRealPath();
-        } catch (IOException e) {
-            throw new PathsException("failed to resolve actual", e);
-        }
-
-        final Path canonicalOther;
-
-        try {
-            canonicalOther = other.toRealPath();
-        } catch (IOException e) {
-            throw new PathsException("failed to resolve path argument", e);
-        }
-
-        if (!canonicalActual.startsWith(canonicalOther))
-            throw failures.failure(info, shouldStartWith(actual, other));
-    }
-
-    public void assertStartsWithRaw(final AssertionInfo info, final Path actual,
-        final Path other)
-    {
-        assertNotNull(info, actual);
-
-        if (other == null)
-            throw new NullPointerException("other should not be null");
-
-        if (!actual.startsWith(other))
-            throw failures.failure(info, shouldStartWith(actual, other));
-    }
-
-    public void assertEndsWith(final AssertionInfo info, final Path actual,
-        final Path other)
-    {
-        assertNotNull(info, actual);
-
-        if (other == null)
-            throw new NullPointerException("other should not be null");
-
-        final Path canonicalActual;
-
-        try {
-            canonicalActual = actual.toRealPath();
-        } catch (IOException e) {
-            throw new PathsException("cannot resolve actual path", e);
-        }
-
-        final Path normalizedOther = other.normalize();
-
-        if (!canonicalActual.endsWith(normalizedOther))
-            throw failures.failure(info, shouldEndWith(actual, other));
-    }
-
-    public void assertEndsWithRaw(final AssertionInfo info, final Path actual,
-        final Path other)
-    {
-        assertNotNull(info, actual);
-
-        if (other == null)
-            throw new NullPointerException("other should not be null");
-
-        if (!actual.endsWith(other))
-            throw failures.failure(info, shouldEndWith(actual, other));
-    }
-
-    private static void assertNotNull(final AssertionInfo info,
-        final Path actual)
-    {
-        Objects.instance().assertNotNull(info, actual);
-    }
+  private static void assertNotNull(final AssertionInfo info, final Path actual) {
+	Objects.instance().assertNotNull(info, actual);
+  }
 }

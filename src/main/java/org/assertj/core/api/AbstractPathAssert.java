@@ -73,13 +73,12 @@ import java.nio.file.spi.FileSystemProvider;
  * @see FileSystems#getDefault()
  * @see Files
  */
-public abstract class AbstractPathAssert<S extends AbstractPathAssert<S>> extends AbstractAssert<S, Path>
-{
+public abstract class AbstractPathAssert<S extends AbstractPathAssert<S>> extends AbstractAssert<S, Path> {
+  
   @VisibleForTesting
   protected Paths paths = Paths.instance();
 
-  protected AbstractPathAssert(final Path actual, final Class<?> selfType)
-  {
+  protected AbstractPathAssert(final Path actual, final Class<?> selfType) {
 	super(actual, selfType);
   }
 
@@ -126,8 +125,7 @@ public abstract class AbstractPathAssert<S extends AbstractPathAssert<S>> extend
    *
    * @see Files#exists(Path, LinkOption...)
    */
-  public S exists()
-  {
+  public S exists() {
 	paths.assertExists(info, actual);
 	return myself;
   }
@@ -170,8 +168,7 @@ public abstract class AbstractPathAssert<S extends AbstractPathAssert<S>> extend
    *
    * @see Files#exists(Path, LinkOption...)
    */
-  public S existsNoFollowLinks()
-  {
+  public S existsNoFollowLinks() {
 	paths.assertExistsNoFollowLinks(info, actual);
 	return myself;
   }
@@ -221,8 +218,7 @@ public abstract class AbstractPathAssert<S extends AbstractPathAssert<S>> extend
    * @see Files#notExists(Path, LinkOption...)
    * @see LinkOption#NOFOLLOW_LINKS
    */
-  public S doesNotExist()
-  {
+  public S doesNotExist() {
 	paths.assertDoesNotExist(info, actual);
 	return myself;
   }
@@ -279,8 +275,7 @@ public abstract class AbstractPathAssert<S extends AbstractPathAssert<S>> extend
    *
    * @return self
    */
-  public S isRegularFile()
-  {
+  public S isRegularFile() {
 	paths.assertIsRegularFile(info, actual);
 	return myself;
   }
@@ -336,8 +331,7 @@ public abstract class AbstractPathAssert<S extends AbstractPathAssert<S>> extend
    *
    * @return self
    */
-  public S isDirectory()
-  {
+  public S isDirectory() {
 	paths.assertIsDirectory(info, actual);
 	return myself;
   }
@@ -388,8 +382,7 @@ public abstract class AbstractPathAssert<S extends AbstractPathAssert<S>> extend
    *
    * @return self
    */
-  public S isSymbolicLink()
-  {
+  public S isSymbolicLink() {
 	paths.assertIsSymbolicLink(info, actual);
 	return myself;
   }
@@ -431,8 +424,7 @@ public abstract class AbstractPathAssert<S extends AbstractPathAssert<S>> extend
    * @see Path#isAbsolute()
    * @see Path#toRealPath(LinkOption...)
    */
-  public S isAbsolute()
-  {
+  public S isAbsolute() {
 	paths.assertIsAbsolute(info, actual);
 	return myself;
   }
@@ -455,19 +447,18 @@ public abstract class AbstractPathAssert<S extends AbstractPathAssert<S>> extend
    *
    * // the following assertions succeed:
    * assertThat(fs.getPath("/usr/lib")).isNormalized();
-   * assertThat(fs.getPath("/../../e")).isNormalized(); TODO test that !
    * assertThat(fs.getPath("a/b/c")).isNormalized();
    * assertThat(fs.getPath("../d")).isNormalized();
    *
    * // the following assertions fail:
    * assertThat(fs.getPath("/a/./b")).isNormalized();
    * assertThat(fs.getPath("c/b/..")).isNormalized();
+   * assertThat(fs.getPath("/../../e")).isNormalized();
    * </code></pre>
    *
    * @return self
    */
-  public S isNormalized()
-  {
+  public S isNormalized() {
 	paths.assertIsNormalized(info, actual);
 	return myself;
   }
@@ -511,8 +502,7 @@ public abstract class AbstractPathAssert<S extends AbstractPathAssert<S>> extend
    * @see Path#toRealPath(LinkOption...)
    * @see Files#isSameFile(Path, Path)
    */
-  public S isCanonical()
-  {
+  public S isCanonical() {
 	paths.assertIsCanonical(info, actual);
 	return myself;
   }
@@ -552,8 +542,7 @@ public abstract class AbstractPathAssert<S extends AbstractPathAssert<S>> extend
    *
    * @see Path#getParent()
    */
-  public S hasParent(final Path expected)
-  {
+  public S hasParent(final Path expected) {
 	paths.assertHasParent(info, actual, expected);
 	return myself;
   }
@@ -605,8 +594,7 @@ public abstract class AbstractPathAssert<S extends AbstractPathAssert<S>> extend
    *
    * @see Path#getParent()
    */
-  public S hasParentRaw(final Path expected)
-  {
+  public S hasParentRaw(final Path expected) {
 	paths.assertHasParentRaw(info, actual, expected);
 	return myself;
   }
@@ -630,13 +618,14 @@ public abstract class AbstractPathAssert<S extends AbstractPathAssert<S>> extend
    * <pre><code class="java">
    * // unixFs is a Unix filesystem
    *
-   * // the following assertions succeed:
-   * assertThat(fs.getPath("/usr")).hasNoParent(); // TODO test that
-   * // this path will be normalized to "/"
+   * // the following assertion succeeds:
+   * assertThat(fs.getPath("/")).hasNoParent();
+   * // this one too as path will be normalized to "/"
    * assertThat(fs.getPath("/usr/..")).hasNoParent();
    *
-   * // the following assertion fails:
+   * // the following assertions fail:
    * assertThat(fs.getPath("/usr/lib")).hasNoParent();
+   * assertThat(fs.getPath("/usr")).hasNoParent();
    * </code></pre>
    *
    * @return self
@@ -645,8 +634,7 @@ public abstract class AbstractPathAssert<S extends AbstractPathAssert<S>> extend
    *
    * @see Path#getParent()
    */
-  public S hasNoParent()
-  {
+  public S hasNoParent() {
 	paths.assertHasNoParent(info, actual);
 	return myself;
   }
@@ -678,19 +666,20 @@ public abstract class AbstractPathAssert<S extends AbstractPathAssert<S>> extend
    *
    * // the following assertions succeed:
    * assertThat(fs.getPath("/")).hasNoParentRaw();
-   * assertThat(fs.getPath("/usr")).hasNoParentRaw();
    * assertThat(fs.getPath("foo")).hasNoParentRaw();
    *
-   * // the following assertion fails:
+   * // the following assertions :
    * assertThat(fs.getPath("/usr/lib")).hasNoParentRaw();
+   * assertThat(fs.getPath("/usr")).hasNoParentRaw();
+   * // this one fails as canonicalization is not performed, leading to parent being /usr
+   * assertThat(fs.getPath("/usr/..")).hasNoParent();
    * </code></pre>
    *
    * @return self
    *
    * @see Path#getParent()
    */
-  public S hasNoParentRaw()
-  {
+  public S hasNoParentRaw() {
 	paths.assertHasNoParentRaw(info, actual);
 	return myself;
   }
@@ -718,9 +707,9 @@ public abstract class AbstractPathAssert<S extends AbstractPathAssert<S>> extend
    * final Path tested = fs.getPath("/home/joe/myfile");
    *
    * // the following assertion succeeds:
+   * assertThat(tested).startsWith(fs.getPath("/home"));
+   * assertThat(tested).startsWith(fs.getPath("/home/"));
    * assertThat(tested).startsWith(fs.getPath("/home/."));
-   * assertThat(tested).startsWith(fs.getPath("/home")); // TODO test
-   * assertThat(tested).startsWith(fs.getPath("/home/")); // TODO test
    * // assertion succeeds because this path will be canonicalized to "/home/joe"
    * assertThat(tested).startsWith(fs.getPath("/home/jane/../joe/."));
    *
@@ -735,8 +724,7 @@ public abstract class AbstractPathAssert<S extends AbstractPathAssert<S>> extend
    *
    * @see Path#startsWith(Path)
    */
-  public S startsWith(final Path other)
-  {
+  public S startsWith(final Path other) {
 	paths.assertStartsWith(info, actual, other);
 	return myself;
   }
@@ -775,7 +763,9 @@ public abstract class AbstractPathAssert<S extends AbstractPathAssert<S>> extend
    * assertThat(tested).startsWithRaw(fs.getPath("/home/joe"));
    *
    * // the following assertion fails:
-   * assertThat(tested).startsWithRaw(fs.getPath("/home/../joe"));
+   * assertThat(tested).startsWithRaw(fs.getPath("/home/harry"));
+   * // .... and this one too as given path is not canonicalized
+   * assertThat(tested).startsWithRaw(fs.getPath("/home/joe/.."));
    * </code></pre>
    *
    * @param other the other path
@@ -783,8 +773,7 @@ public abstract class AbstractPathAssert<S extends AbstractPathAssert<S>> extend
    *
    * @see Path#startsWith(Path)
    */
-  public S startsWithRaw(final Path other)
-  {
+  public S startsWithRaw(final Path other) {
 	paths.assertStartsWithRaw(info, actual, other);
 	return myself;
   }
@@ -809,8 +798,8 @@ public abstract class AbstractPathAssert<S extends AbstractPathAssert<S>> extend
    * <pre><code class="java">
    * // fs is a Unix filesystem.
    * // the current directory is supposed to be /home.
-   * // tested will be canonicalized to /home/joe/myfile
-   * final Path tested = fs.getPath("/home/jane/../joe/myfile");
+   * final Path tested = fs.getPath("/home/joe/myfile");
+   * // as tested will be canonicalized, it could have been written: /home/jane/../joe/myfile
    *
    * // the following assertion succeeds:
    * assertThat(tested).endsWith(fs.getPath("joe/myfile"));
@@ -827,8 +816,7 @@ public abstract class AbstractPathAssert<S extends AbstractPathAssert<S>> extend
    * @throws PathsException failed to canonicalize the tested path (see class
    *           description)
    */
-  public S endsWith(final Path other)
-  {
+  public S endsWith(final Path other) {
 	paths.assertEndsWith(info, actual, other);
 	return myself;
   }
@@ -861,8 +849,8 @@ public abstract class AbstractPathAssert<S extends AbstractPathAssert<S>> extend
    * // The following assertion succeeds:
    * assertThat(tested).endsWithRaw(fs.getPath("joe/myfile"));
    *
-   * // But the following assertions fail:
-   * assertThat(tested).endsWithRaw(fs.getPath("harry//myfile"));
+   * // But the following assertion fails:
+   * assertThat(tested).endsWithRaw(fs.getPath("harry/myfile"));
    * // and this one too as the given path is not normalized
    * assertThat(tested).endsWithRaw(fs.getPath("harry/../joe/myfile"));
    * </code></pre>
@@ -870,8 +858,7 @@ public abstract class AbstractPathAssert<S extends AbstractPathAssert<S>> extend
    * @param other the other path
    * @return self
    */
-  public S endsWithRaw(final Path other)
-  {
+  public S endsWithRaw(final Path other) {
 	paths.assertEndsWithRaw(info, actual, other);
 	return myself;
   }

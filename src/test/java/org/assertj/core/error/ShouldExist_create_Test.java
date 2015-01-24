@@ -12,19 +12,19 @@
  */
 package org.assertj.core.error;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.error.ShouldExist.PATH_SHOULD_EXIST;
+import static org.assertj.core.error.ShouldExist.shouldExist;
+import static org.mockito.Mockito.mock;
+
+import java.nio.file.Path;
+
 import org.assertj.core.description.Description;
 import org.assertj.core.internal.TestDescription;
 import org.assertj.core.presentation.Representation;
 import org.assertj.core.presentation.StandardRepresentation;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.nio.file.Path;
-
-import static junit.framework.Assert.assertEquals;
-import static org.assertj.core.error.ShouldExist.PATH_SHOULD_EXIST;
-import static org.assertj.core.error.ShouldExist.shouldExist;
-import static org.mockito.Mockito.mock;
 
 /**
  * Tests for {@link ShouldExist#create(Description, Representation)}
@@ -51,9 +51,9 @@ public class ShouldExist_create_Test {
     factory = shouldExist(new FakeFile("xyz"));
     actualMessage = factory.create(description, representation);
 
-    expectedMessage = "[Test] \nExpecting file:\n  <xyz>\nto exist";
+    expectedMessage = "[Test] \nExpecting file:\n  <xyz>\nto exist.";
 
-    assertEquals(expectedMessage, actualMessage);
+    assertThat(actualMessage).isEqualTo(expectedMessage);
   }
 
   @Test
@@ -65,6 +65,6 @@ public class ShouldExist_create_Test {
 
     expectedMessage = String.format("[Test] " + PATH_SHOULD_EXIST, actual);
 
-    assertEquals(expectedMessage, actualMessage);
+    assertThat(actualMessage).isEqualTo(expectedMessage);
   }
 }

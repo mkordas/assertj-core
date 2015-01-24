@@ -12,29 +12,25 @@
  */
 package org.assertj.core.api.path;
 
-import org.assertj.core.api.PathAssert;
-import org.assertj.core.api.PathAssertBaseTest;
-
-import java.nio.file.Path;
-
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-public class PathAssert_hasParent_Test
-    extends PathAssertBaseTest
-{
-    private final Path expected = mock(Path.class);
+import java.nio.file.Path;
 
-    @Override
-    protected PathAssert invoke_api_method()
-    {
-        return assertions.hasParent(expected);
-    }
+import org.assertj.core.api.PathAssert;
+import org.assertj.core.api.PathAssertBaseTest;
 
-    @Override
-    protected void verify_internal_effects()
-    {
-        verify(paths).assertHasParent(getInfo(assertions), getActual(
-            assertions), expected);
-    }
+public class PathAssert_hasParent_Test extends PathAssertBaseTest {
+
+  private final Path expected = mock(Path.class);
+
+  @Override
+  protected PathAssert invoke_api_method() {
+	return assertions.hasParent(expected);
+  }
+
+  @Override
+  protected void verify_internal_effects() {
+	verify(paths).assertHasParent(getInfo(assertions), getActual(assertions), expected);
+  }
 }

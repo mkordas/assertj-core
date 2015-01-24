@@ -12,13 +12,7 @@
  */
 package org.assertj.core.internal.paths;
 
-import org.assertj.core.internal.PathsBaseTest;
-import org.junit.Before;
-import org.junit.Test;
-
-import java.nio.file.Path;
-
-import static junit.framework.TestCase.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.error.ShouldEndWithPath.shouldEndWith;
 import static org.assertj.core.test.TestFailures.wasExpectingAssertionError;
 import static org.assertj.core.util.FailureMessages.actualIsNull;
@@ -27,57 +21,56 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@SuppressWarnings("AutoBoxing")
-public class Paths_assertEndsWithRaw_Test
-    extends PathsBaseTest
-{
-    private Path actual;
-    private Path other;
+import java.nio.file.Path;
 
-    @Before
-    public void init()
-    {
-        actual = mock(Path.class);
-        other = mock(Path.class);
-    }
+import org.assertj.core.internal.PathsBaseTest;
+import org.junit.Before;
+import org.junit.Test;
 
-    @Test
-    public void should_fail_if_actual_is_null()
-    {
-        thrown.expectAssertionError(actualIsNull());
-        paths.assertEndsWithRaw(info, null, other);
-    }
+public class Paths_assertEndsWithRaw_Test extends PathsBaseTest {
 
-    @Test
-    public void should_fail_if_other_is_null()
-    {
-        try {
-            paths.assertEndsWithRaw(info, actual, null);
-            fail("expected a NullPointerException here");
-        } catch (NullPointerException e) {
-            assertEquals(e.getMessage(), "other should not be null");
-        }
-    }
+  private Path actual;
+  private Path other;
 
-    @Test
-    public void should_fail_if_actual_does_not_end_with_other()
-    {
-        // This is the default, but let's make this explicit
-        when(actual.endsWith(other)).thenReturn(false);
+  @Before
+  public void init() {
+	actual = mock(Path.class);
+	other = mock(Path.class);
+  }
 
-        try {
-            paths.assertEndsWithRaw(info, actual, other);
-            wasExpectingAssertionError();
-        } catch (AssertionError e) {
-            verify(failures).failure(info, shouldEndWith(actual, other));
-        }
-    }
+  @Test
+  public void should_fail_if_actual_is_null() {
+	thrown.expectAssertionError(actualIsNull());
+	paths.assertEndsWithRaw(info, null, other);
+  }
 
-    @Test
-    public void should_succeed_if_actual_ends_with_other()
-    {
-        when(actual.endsWith(other)).thenReturn(true);
+  @Test
+  public void should_fail_if_other_is_null() {
+	try {
+	  paths.assertEndsWithRaw(info, actual, null);
+	  fail("expected a NullPointerException here");
+	} catch (NullPointerException e) {
+	  assertThat(e).hasMessage("the expected end path should not be null");
+	}
+  }
 
-        paths.assertEndsWithRaw(info, actual, other);
-    }
+  @Test
+  public void should_fail_if_actual_does_not_end_with_other() {
+	// This is the default, but let's make this explicit
+	when(actual.endsWith(other)).thenReturn(false);
+
+	try {
+	  paths.assertEndsWithRaw(info, actual, other);
+	  wasExpectingAssertionError();
+	} catch (AssertionError e) {
+	  verify(failures).failure(info, shouldEndWith(actual, other));
+	}
+  }
+
+  @Test
+  public void should_succeed_if_actual_ends_with_other() {
+	when(actual.endsWith(other)).thenReturn(true);
+
+	paths.assertEndsWithRaw(info, actual, other);
+  }
 }

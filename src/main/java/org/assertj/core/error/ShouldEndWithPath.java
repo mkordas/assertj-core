@@ -16,21 +16,15 @@ import org.assertj.core.util.VisibleForTesting;
 
 import java.nio.file.Path;
 
-public class ShouldEndWithPath
-    extends BasicErrorMessageFactory
-{
-    @VisibleForTesting
-    public static final String PATH_SHOULD_END_WITH
-        = "Expected path:%n  <%s>%nto end with:%n  <%s>%nbut it does not";
+public class ShouldEndWithPath extends BasicErrorMessageFactory {
+  @VisibleForTesting
+  public static final String PATH_SHOULD_END_WITH = "%nExpected path:%n  <%s>%nto end with:%n  <%s>%nbut it did not.";
 
-    public static ErrorMessageFactory shouldEndWith(final Path actual,
-        final Path other)
-    {
-        return new ShouldEndWithPath(actual, other);
-    }
+  public static ErrorMessageFactory shouldEndWith(final Path actual, final Path other) {
+	return new ShouldEndWithPath(actual, other);
+  }
 
-    private ShouldEndWithPath(final Path actual, final Path other)
-    {
-        super(PATH_SHOULD_END_WITH, actual, other);
-    }
+  private ShouldEndWithPath(final Path actual, final Path other) {
+	super(PATH_SHOULD_END_WITH, actual, other);
+  }
 }

@@ -12,87 +12,71 @@
  */
 package org.assertj.core.internal.paths;
 
-import org.assertj.core.internal.PathsBaseTest;
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
-import org.junit.Test;
+import static org.assertj.core.error.ShouldNotExist.shouldNotExist;
+import static org.assertj.core.test.TestFailures.wasExpectingAssertionError;
+import static org.assertj.core.util.FailureMessages.actualIsNull;
+import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import static org.assertj.core.error.ShouldNotExist.shouldNotExist;
-import static org.assertj.core.test.TestFailures.wasExpectingAssertionError;
-import static org.assertj.core.util.FailureMessages.actualIsNull;
-import static org.mockito.Mockito.verify;
+import org.assertj.core.internal.PathsBaseTest;
+import org.junit.BeforeClass;
+import org.junit.ClassRule;
+import org.junit.Test;
 
-public class Paths_assertNotExists_Test
-    extends PathsBaseTest
-{
-    @ClassRule
-    public static FileSystemResource resource;
+public class Paths_assertNotExists_Test extends PathsBaseTest {
 
-    static {
-        try {
-            resource = new FileSystemResource();
-        } catch (IOException e) {
-            throw new ExceptionInInitializerError(e);
+  @ClassRule
+  public static FileSystemResource resource = new FileSystemResource();
 
-        }
-    }
+  private static Path existing;
+  private static Path symlink;
+  private static Path nonExisting;
 
-    public static Path existing;
-    public static Path symlink;
-    public static Path nonExisting;
+  @BeforeClass
+  public static void initPaths() throws IOException {
 
-    @BeforeClass
-    public static void initPaths()
-        throws IOException
-    {
-        final FileSystem fs = resource.getFileSystem();
+	final FileSystem fs = resource.getFileSystem();
 
-        existing = fs.getPath("/existing");
-        Files.createFile(existing);
+	existing = fs.getPath("/existing");
+	Files.createFile(existing);
+	nonExisting = fs.getPath("/nonExisting");
 
-        nonExisting = fs.getPath("/nonExisting");
+	symlink = fs.getPath("/symlink");
+	Files.createSymbolicLink(symlink, nonExisting);
+  }
 
-        symlink = fs.getPath("/symlink");
-        Files.createSymbolicLink(symlink, nonExisting);
-    }
+  @Test
+  public void should_fail_if_actual_is_null() {
+	thrown.expectAssertionError(actualIsNull());
+	paths.assertDoesNotExist(info, null);
+  }
 
-    @Test
-    public void should_fail_if_actual_is_null()
-    {
-        thrown.expectAssertionError(actualIsNull());
-        paths.assertDoesNotExist(info, null);
-    }
+  @Test
+  public void should_fail_if_actual_exists() {
+	try {
+	  paths.assertDoesNotExist(info, existing);
+	  wasExpectingAssertionError();
+	} catch (AssertionError e) {
+	  verify(failures).failure(info, shouldNotExist(existing));
+	}
+  }
 
-    @Test
-    public void should_fail_if_actual_exists()
-    {
-        try {
-            paths.assertDoesNotExist(info, existing);
-            wasExpectingAssertionError();
-        } catch (AssertionError e) {
-            verify(failures).failure(info, shouldNotExist(existing));
-        }
-    }
+  @Test
+  public void should_fail_even_if_actual_is_dangling_symlink() {
+	try {
+	  paths.assertDoesNotExist(info, symlink);
+	  wasExpectingAssertionError();
+	} catch (AssertionError e) {
+	  verify(failures).failure(info, shouldNotExist(symlink));
+	}
+  }
 
-    @Test
-    public void should_fail_even_if_actual_is_dangling_symlink()
-    {
-        try {
-            paths.assertDoesNotExist(info, symlink);
-            wasExpectingAssertionError();
-        } catch (AssertionError e) {
-            verify(failures).failure(info, shouldNotExist(symlink));
-        }
-    }
-
-    @Test
-    public void should_pass_if_actual_does_not_exist()
-    {
-        paths.assertDoesNotExist(info, nonExisting);
-    }
+  @Test
+  public void should_pass_if_actual_does_not_exist() {
+	paths.assertDoesNotExist(info, nonExisting);
+  }
 }

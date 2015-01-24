@@ -12,47 +12,26 @@
  */
 package org.assertj.core.error;
 
-import org.assertj.core.internal.TestDescription;
-import org.assertj.core.presentation.Representation;
-import org.assertj.core.presentation.StandardRepresentation;
-import org.junit.Before;
-import org.junit.Test;
-
-import java.nio.file.Path;
-
-import static junit.framework.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.error.ShouldEndWithPath.PATH_SHOULD_END_WITH;
 import static org.assertj.core.error.ShouldEndWithPath.shouldEndWith;
 import static org.mockito.Mockito.mock;
 
-public final class ShouldEndWithPath_create_Test
-{
-    private TestDescription description;
-    private Representation representation;
+import java.nio.file.Path;
 
-    private ErrorMessageFactory factory;
-    private String actualMessage;
-    private String expectedMessage;
+import org.assertj.core.internal.TestDescription;
+import org.assertj.core.presentation.StandardRepresentation;
+import org.junit.Test;
 
-    @Before
-    public void setup()
-    {
-        description = new TestDescription("Test");
-        representation = new StandardRepresentation();
-    }
+public final class ShouldEndWithPath_create_Test {
 
-    @Test
-    public void should_create_error_message()
-    {
-        final Path actual = mock(Path.class);
-        final Path other = mock(Path.class);
+  @Test
+  public void should_create_error_message() {
+	final Path actual = mock(Path.class);
+	final Path other = mock(Path.class);
+	String actualMessage = shouldEndWith(actual, other).create(new TestDescription("Test"),
+	                                                           new StandardRepresentation());
+	assertThat(actualMessage).isEqualTo(String.format("[Test] " + PATH_SHOULD_END_WITH, actual, other));
+  }
 
-        factory = shouldEndWith(actual, other);
-        actualMessage = factory.create(description, representation);
-
-        expectedMessage = String.format("[Test] " + PATH_SHOULD_END_WITH,
-            actual, other);
-
-        assertEquals(expectedMessage, actualMessage);
-    }
 }

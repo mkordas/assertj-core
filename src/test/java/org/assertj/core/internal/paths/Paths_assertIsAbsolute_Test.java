@@ -12,56 +12,38 @@
  */
 package org.assertj.core.internal.paths;
 
-import org.assertj.core.internal.PathsBaseTest;
-import org.junit.Before;
-import org.junit.Test;
-
-import java.nio.file.Path;
-
 import static org.assertj.core.error.ShouldBeAbsolutePath.shouldBeAbsolutePath;
 import static org.assertj.core.test.TestFailures.wasExpectingAssertionError;
 import static org.assertj.core.util.FailureMessages.actualIsNull;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@SuppressWarnings("AutoBoxing")
-public class Paths_assertIsAbsolute_Test
-    extends PathsBaseTest
-{
-    private Path actual;
+import org.junit.Test;
 
-    @Before
-    public void init()
-    {
-        actual = mock(Path.class);
-    }
+public class Paths_assertIsAbsolute_Test extends MockPathsBaseTest {
 
-    @Test
-    public void should_fail_if_actual_is_null()
-    {
-        thrown.expectAssertionError(actualIsNull());
-        paths.assertIsAbsolute(info, null);
-    }
+  @Test
+  public void should_fail_if_actual_is_null() {
+	thrown.expectAssertionError(actualIsNull());
+	paths.assertIsAbsolute(info, null);
+  }
 
-    @Test
-    public void should_fail_if_actual_is_not_absolute()
-    {
-        // This is the default, but make it explicit
-        when(actual.isAbsolute()).thenReturn(false);
+  @Test
+  public void should_fail_if_actual_is_not_absolute() {
+	// This is the default, but make it explicit
+	when(actual.isAbsolute()).thenReturn(false);
 
-        try {
-            paths.assertIsAbsolute(info, actual);
-            wasExpectingAssertionError();
-        } catch (AssertionError e) {
-            verify(failures).failure(info, shouldBeAbsolutePath(actual));
-        }
-    }
+	try {
+	  paths.assertIsAbsolute(info, actual);
+	  wasExpectingAssertionError();
+	} catch (AssertionError e) {
+	  verify(failures).failure(info, shouldBeAbsolutePath(actual));
+	}
+  }
 
-    @Test
-    public void should_pass_if_actual_is_absolute()
-    {
-        when(actual.isAbsolute()).thenReturn(true);
-        paths.assertIsAbsolute(info, actual);
-    }
+  @Test
+  public void should_pass_if_actual_is_absolute() {
+	when(actual.isAbsolute()).thenReturn(true);
+	paths.assertIsAbsolute(info, actual);
+  }
 }

@@ -12,128 +12,108 @@
  */
 package org.assertj.core.internal.paths;
 
-import org.assertj.core.internal.PathsBaseTest;
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
-import org.junit.Test;
-
-import java.io.IOException;
-import java.nio.file.FileSystem;
-import java.nio.file.Files;
-import java.nio.file.Path;
-
 import static org.assertj.core.error.ShouldBeDirectory.shouldBeDirectory;
 import static org.assertj.core.error.ShouldExist.shouldExist;
 import static org.assertj.core.test.TestFailures.wasExpectingAssertionError;
 import static org.assertj.core.util.FailureMessages.actualIsNull;
 import static org.mockito.Mockito.verify;
 
-public class Paths_assertIsDirectory_Test
-    extends PathsBaseTest
-{
-    @ClassRule
-    public static FileSystemResource resource;
+import java.io.IOException;
+import java.nio.file.FileSystem;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
-    static {
-        try {
-            resource = new FileSystemResource();
-        } catch (IOException e) {
-            throw new ExceptionInInitializerError(e);
+import org.assertj.core.internal.PathsBaseTest;
+import org.junit.BeforeClass;
+import org.junit.ClassRule;
+import org.junit.Test;
 
-        }
-    }
+public class Paths_assertIsDirectory_Test extends PathsBaseTest {
 
-    public static Path regularFile;
-    public static Path symlink;
+  @ClassRule
+  public static FileSystemResource resource = new FileSystemResource();
 
-    public static Path nonExisting;
-    public static Path dangling;
+  private static Path regularFile;
+  private static Path symlink;
 
-    public static Path directory;
-    public static Path dirSymlink;
+  private static Path nonExisting;
+  private static Path dangling;
 
-    @BeforeClass
-    public static void initPaths()
-        throws IOException
-    {
-        final FileSystem fs = resource.getFileSystem();
+  private static Path directory;
+  private static Path dirSymlink;
 
-        regularFile = fs.getPath("/existing");
-        symlink = fs.getPath("/symlink");
-        Files.createFile(regularFile);
-        Files.createSymbolicLink(symlink, regularFile);
+  @BeforeClass
+  public static void initPaths() throws IOException {
+	final FileSystem fs = resource.getFileSystem();
 
+	regularFile = fs.getPath("/existing");
+	symlink = fs.getPath("/symlink");
+	Files.createFile(regularFile);
+	Files.createSymbolicLink(symlink, regularFile);
 
-        nonExisting = fs.getPath("/nonExisting");
-        dangling = fs.getPath("/dangling");
-        Files.createSymbolicLink(dangling, nonExisting);
+	nonExisting = fs.getPath("/nonExisting");
+	dangling = fs.getPath("/dangling");
+	Files.createSymbolicLink(dangling, nonExisting);
 
-        directory = fs.getPath("/dir");
-        dirSymlink = fs.getPath("/dirsymlink");
-        Files.createDirectory(directory);
-        Files.createSymbolicLink(dirSymlink, directory);
-    }
+	directory = fs.getPath("/dir");
+	dirSymlink = fs.getPath("/dirsymlink");
+	Files.createDirectory(directory);
+	Files.createSymbolicLink(dirSymlink, directory);
+  }
 
-    @Test
-    public void should_fail_if_actual_is_null()
-    {
-        thrown.expectAssertionError(actualIsNull());
-        paths.assertIsDirectory(info, null);
-    }
+  @Test
+  public void should_fail_if_actual_is_null() {
+	thrown.expectAssertionError(actualIsNull());
+	paths.assertIsDirectory(info, null);
+  }
 
-    @Test
-    public void should_fail_with_notexists_if_actual_does_not_exist()
-    {
-        try {
-            paths.assertIsDirectory(info, nonExisting);
-            wasExpectingAssertionError();
-        } catch (AssertionError e) {
-            verify(failures).failure(info, shouldExist(nonExisting));
-        }
-    }
+  @Test
+  public void should_fail_with_notexists_if_actual_does_not_exist() {
+	try {
+	  paths.assertIsDirectory(info, nonExisting);
+	  wasExpectingAssertionError();
+	} catch (AssertionError e) {
+	  verify(failures).failure(info, shouldExist(nonExisting));
+	}
+  }
 
-    @Test
-    public void should_fail_with_notexists_if_actual_is_dangling_symlink()
-    {
-        try {
-            paths.assertIsDirectory(info, dangling);
-            wasExpectingAssertionError();
-        } catch (AssertionError e) {
-            verify(failures).failure(info, shouldExist(dangling));
-        }
-    }
+  @Test
+  public void should_fail_with_notexists_if_actual_is_dangling_symlink() {
+	try {
+	  paths.assertIsDirectory(info, dangling);
+	  wasExpectingAssertionError();
+	} catch (AssertionError e) {
+	  verify(failures).failure(info, shouldExist(dangling));
+	}
+  }
 
-    @Test
-    public void should_fail_if_actual_is_regular_file()
-    {
-        try {
-            paths.assertIsDirectory(info, regularFile);
-            wasExpectingAssertionError();
-        } catch (AssertionError e) {
-            verify(failures).failure(info, shouldBeDirectory(regularFile));
-        }
-    }
+  @Test
+  public void should_fail_if_actual_is_regular_file() {
+	try {
+	  paths.assertIsDirectory(info, regularFile);
+	  wasExpectingAssertionError();
+	} catch (AssertionError e) {
+	  verify(failures).failure(info, shouldBeDirectory(regularFile));
+	}
+  }
 
-    @Test
-    public void should_fail_if_actual_is_symlink_pointing_to_regular_file()
-    {
-        try {
-            paths.assertIsDirectory(info, symlink);
-            wasExpectingAssertionError();
-        } catch (AssertionError e) {
-            verify(failures).failure(info, shouldBeDirectory(symlink));
-        }
-    }
+  @Test
+  public void should_fail_if_actual_is_symlink_pointing_to_regular_file() {
+	try {
+	  paths.assertIsDirectory(info, symlink);
+	  wasExpectingAssertionError();
+	} catch (AssertionError e) {
+	  verify(failures).failure(info, shouldBeDirectory(symlink));
+	}
+  }
 
-    @Test
-    public void should_succeed_if_target_is_directory()
-    {
-        paths.assertIsDirectory(info, directory);
-    }
+  @Test
+  public void should_succeed_if_target_is_directory() {
+	paths.assertIsDirectory(info, directory);
+  }
 
-    @Test
-    public void should_succeed_if_target_is_symlink_pointing_to_directory()
-    {
-        paths.assertIsDirectory(info, dirSymlink);
-    }
+  @Test
+  public void should_succeed_if_target_is_symlink_pointing_to_directory() {
+	paths.assertIsDirectory(info, dirSymlink);
+  }
 }
