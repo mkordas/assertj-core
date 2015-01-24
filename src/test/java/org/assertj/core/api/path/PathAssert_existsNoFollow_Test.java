@@ -23,13 +23,13 @@ public class PathAssert_existsNoFollow_Test
     @Override
     protected PathAssert invoke_api_method()
     {
-        return assertions.existsNoFollow();
+        return assertions.existsNoFollowLinks();
     }
 
     @Override
     protected void verify_internal_effects()
     {
-        verify(paths).assertExistsNoFollow(getInfo(assertions),
+        verify(paths).assertExistsNoFollowLinks(getInfo(assertions),
             getActual(assertions));
     }
 }

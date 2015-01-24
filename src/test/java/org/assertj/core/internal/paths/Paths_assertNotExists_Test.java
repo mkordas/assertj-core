@@ -65,14 +65,14 @@ public class Paths_assertNotExists_Test
     public void should_fail_if_actual_is_null()
     {
         thrown.expectAssertionError(actualIsNull());
-        paths.assertNotExists(info, null);
+        paths.assertDoesNotExist(info, null);
     }
 
     @Test
     public void should_fail_if_actual_exists()
     {
         try {
-            paths.assertNotExists(info, existing);
+            paths.assertDoesNotExist(info, existing);
             wasExpectingAssertionError();
         } catch (AssertionError e) {
             verify(failures).failure(info, shouldNotExist(existing));
@@ -83,7 +83,7 @@ public class Paths_assertNotExists_Test
     public void should_fail_even_if_actual_is_dangling_symlink()
     {
         try {
-            paths.assertNotExists(info, symlink);
+            paths.assertDoesNotExist(info, symlink);
             wasExpectingAssertionError();
         } catch (AssertionError e) {
             verify(failures).failure(info, shouldNotExist(symlink));
@@ -93,6 +93,6 @@ public class Paths_assertNotExists_Test
     @Test
     public void should_pass_if_actual_does_not_exist()
     {
-        paths.assertNotExists(info, nonExisting);
+        paths.assertDoesNotExist(info, nonExisting);
     }
 }

@@ -62,7 +62,7 @@ public class Paths
             throw failures.failure(info, shouldExist(actual));
     }
 
-    public void assertExistsNoFollow(final AssertionInfo info,
+    public void assertExistsNoFollowLinks(final AssertionInfo info,
         final Path actual)
     {
         assertNotNull(info, actual);
@@ -71,7 +71,7 @@ public class Paths
             throw failures.failure(info, shouldExistNoFollow(actual));
     }
 
-    public void assertNotExists(final AssertionInfo info, final Path actual)
+    public void assertDoesNotExist(final AssertionInfo info, final Path actual)
     {
         assertNotNull(info, actual);
         if (!java.nio.file.Files.notExists(actual, LinkOption.NOFOLLOW_LINKS))
@@ -97,7 +97,7 @@ public class Paths
     public void assertIsSymbolicLink(final AssertionInfo info,
         final Path actual)
     {
-        assertExistsNoFollow(info, actual);
+        assertExistsNoFollowLinks(info, actual);
 
         if (!java.nio.file.Files.isSymbolicLink(actual))
             throw failures.failure(info, shouldBeSymbolicLink(actual));

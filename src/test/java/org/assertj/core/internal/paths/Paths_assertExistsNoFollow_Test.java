@@ -68,14 +68,14 @@ public class Paths_assertExistsNoFollow_Test
     public void should_fail_if_actual_is_null()
     {
         thrown.expectAssertionError(actualIsNull());
-        paths.assertExistsNoFollow(info, null);
+        paths.assertExistsNoFollowLinks(info, null);
     }
 
     @Test
     public void should_fail_if_actual_does_not_exist()
     {
         try {
-            paths.assertExistsNoFollow(info, nonExisting);
+            paths.assertExistsNoFollowLinks(info, nonExisting);
             wasExpectingAssertionError();
         } catch (AssertionError e) {
             verify(failures).failure(info, shouldExistNoFollow(nonExisting));
@@ -85,18 +85,18 @@ public class Paths_assertExistsNoFollow_Test
     @Test
     public void should_succeed_if_actual_is_dangling_symlink()
     {
-        paths.assertExistsNoFollow(info, dangling);
+        paths.assertExistsNoFollowLinks(info, dangling);
     }
 
     @Test
     public void should_pass_if_actual_exists()
     {
-        paths.assertExistsNoFollow(info, existing);
+        paths.assertExistsNoFollowLinks(info, existing);
     }
 
     @Test
     public void should_pass_if_actual_is_non_dangling_symlink()
     {
-        paths.assertExistsNoFollow(info, symlink);
+        paths.assertExistsNoFollowLinks(info, symlink);
     }
 }

@@ -29,7 +29,7 @@ public class PathAssert_doesNotExist_Test
     @Override
     protected void verify_internal_effects()
     {
-        verify(paths).assertNotExists(getInfo(assertions),
+        verify(paths).assertDoesNotExist(getInfo(assertions),
             getActual(assertions));
     }
 }
