@@ -47,12 +47,12 @@ public class Paths_assertIsDirectory_Test extends PathsBaseTest {
 	final FileSystem fs = resource.getFileSystem();
 
 	regularFile = fs.getPath("/existing");
-	symlink = fs.getPath("/symlink");
+	symlink = fs.getPath("/symlinkToExisting");
 	Files.createFile(regularFile);
 	Files.createSymbolicLink(symlink, regularFile);
 
 	nonExisting = fs.getPath("/nonExisting");
-	dangling = fs.getPath("/dangling");
+	dangling = fs.getPath("/symlinkToNonExisting");
 	Files.createSymbolicLink(dangling, nonExisting);
 
 	directory = fs.getPath("/dir");

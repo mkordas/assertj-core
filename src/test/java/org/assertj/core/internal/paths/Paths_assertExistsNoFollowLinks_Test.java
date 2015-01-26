@@ -34,8 +34,8 @@ public class Paths_assertExistsNoFollowLinks_Test extends PathsBaseTest {
 
   private static Path existing;
   private static Path nonExisting;
-  private static Path symlink;
-  private static Path dangling;
+  private static Path symlinkToExisting;
+  private static Path symlinkToNonExisting;
 
   @BeforeClass
   public static void initPaths() throws IOException {
@@ -43,13 +43,12 @@ public class Paths_assertExistsNoFollowLinks_Test extends PathsBaseTest {
 
 	existing = fs.getPath("/existing");
 	Files.createFile(existing);
-
-	symlink = fs.getPath("/symlink");
-	Files.createSymbolicLink(symlink, existing);
+	symlinkToExisting = fs.getPath("/symlinkToExisting");
+	Files.createSymbolicLink(symlinkToExisting, existing);
 
 	nonExisting = fs.getPath("/nonExisting");
-	dangling = fs.getPath("/dangling");
-	Files.createSymbolicLink(dangling, nonExisting);
+	symlinkToNonExisting = fs.getPath("/symlinkToNonExisting");
+	Files.createSymbolicLink(symlinkToNonExisting, nonExisting);
   }
 
   @Test
@@ -69,8 +68,8 @@ public class Paths_assertExistsNoFollowLinks_Test extends PathsBaseTest {
   }
 
   @Test
-  public void should_succeed_if_actual_is_dangling_symlink() {
-	paths.assertExistsNoFollowLinks(info, dangling);
+  public void should_pass_if_actual_is_a_symlink_to_a_non_existent_file() {
+	paths.assertExistsNoFollowLinks(info, symlinkToNonExisting);
   }
 
   @Test
@@ -79,7 +78,7 @@ public class Paths_assertExistsNoFollowLinks_Test extends PathsBaseTest {
   }
 
   @Test
-  public void should_pass_if_actual_is_non_dangling_symlink() {
-	paths.assertExistsNoFollowLinks(info, symlink);
+  public void should_pass_if_actual_is_a_symlink_to_an_existing_file() {
+	paths.assertExistsNoFollowLinks(info, symlinkToExisting);
   }
 }

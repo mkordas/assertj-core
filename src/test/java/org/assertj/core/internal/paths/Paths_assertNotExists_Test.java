@@ -45,7 +45,7 @@ public class Paths_assertNotExists_Test extends PathsBaseTest {
 	Files.createFile(existing);
 	nonExisting = fs.getPath("/nonExisting");
 
-	symlink = fs.getPath("/symlink");
+	symlink = fs.getPath("/symlinkToExisting");
 	Files.createSymbolicLink(symlink, nonExisting);
   }
 

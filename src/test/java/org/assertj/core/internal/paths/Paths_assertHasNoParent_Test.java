@@ -44,7 +44,7 @@ public class Paths_assertHasNoParent_Test extends MockPathsBaseTest {
 	  paths.assertHasNoParent(info, actual);
 	  fail("was expecting a PathsException");
 	} catch (PathsException e) {
-	  assertThat(e).hasMessage("cannot resolve actual path");
+	  assertThat(e).hasMessage("failed to resolve actual real path");
 	  assertThat(e.getCause()).isSameAs(exception);
 	}
   }

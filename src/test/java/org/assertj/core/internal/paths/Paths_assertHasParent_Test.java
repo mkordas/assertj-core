@@ -67,8 +67,8 @@ public class Paths_assertHasParent_Test extends MockPathsBaseTest {
 	  paths.assertHasParent(info, actual, expected);
 	  fail("expected a PathsException here");
 	} catch (PathsException e) {
-	  assertThat(e).hasMessage("failed to resolve actual");
-	  assertThat(e.getCause()).isSameAs(e.getCause());
+	  assertThat(e).hasMessage("failed to resolve actual real path");
+	  assertThat(e.getCause()).isSameAs(exception);
 	}
   }
 
@@ -83,8 +83,8 @@ public class Paths_assertHasParent_Test extends MockPathsBaseTest {
 	  paths.assertHasParent(info, actual, expected);
 	  fail("expected a PathsException here");
 	} catch (PathsException e) {
-	  assertThat(e).hasMessage("failed to resolve path argument");
-	  assertThat(e.getCause()).isSameAs(e.getCause());
+	  assertThat(e).hasMessage("failed to resolve argument real path");
+	  assertThat(e.getCause()).isSameAs(exception);
 	}
   }
 

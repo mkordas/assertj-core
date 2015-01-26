@@ -29,8 +29,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
- * Tests for {@link ShouldHaveNoParent#shouldHaveNoParent(File)} and {@link
- * ShouldHaveNoParent#shouldHaveNoParent(Path)}
+ * Tests for {@link ShouldHaveNoParent#shouldHaveNoParent(File)} and {@link ShouldHaveNoParent#shouldHaveNoParent(Path)}
  * 
  * @author Jean-Christophe Gay
  * @author Francis Galiegue
@@ -48,37 +47,39 @@ public class ShouldHaveNoParent_create_Test
   @Before
   public void setup()
   {
-    description = new TestDescription("Test");
-    representation = new StandardRepresentation();
+	description = new TestDescription("Test");
+	representation = new StandardRepresentation();
   }
 
   @Test
   public void should_create_error_message_when_file_has_a_parent()
   {
-    final File file = mock(File.class);
-    final FakeFile parent = new FakeFile("unexpected.parent");
-    when(file.getParentFile()).thenReturn(parent);
+	final File file = mock(File.class);
+	final FakeFile parent = new FakeFile("unexpected.parent");
+	when(file.getParentFile()).thenReturn(parent);
+	String fileAbsolutePath = "/path/to/file";
+	when(file.getAbsolutePath()).thenReturn(fileAbsolutePath);
 
-    factory = shouldHaveNoParent(file);
-    actualMessage = factory.create(description, representation);
+	factory = shouldHaveNoParent(file);
+	actualMessage = factory.create(description, representation);
 
-    expectedMessage = String.format("[Test] " + FILE_HAS_PARENT, parent);
+	expectedMessage = String.format("[Test] " + FILE_HAS_PARENT, fileAbsolutePath, parent);
 
-    assertThat(actualMessage).isEqualTo(expectedMessage);
+	assertThat(actualMessage).isEqualTo(expectedMessage);
   }
 
   @Test
   public void should_create_error_message_when_path_has_a_parent()
   {
-    final Path path = mock(Path.class);
-    final Path parent = mock(Path.class);
-    when(path.getParent()).thenReturn(parent);
+	final Path path = mock(Path.class);
+	final Path parent = mock(Path.class);
+	when(path.getParent()).thenReturn(parent);
 
-    factory = shouldHaveNoParent(path);
-    actualMessage = factory.create(description, representation);
+	factory = shouldHaveNoParent(path);
+	actualMessage = factory.create(description, representation);
 
-    expectedMessage = String.format("[Test] " + PATH_HAS_PARENT, parent);
+	expectedMessage = String.format("[Test] " + PATH_HAS_PARENT, path, parent);
 
-    assertThat(actualMessage).isEqualTo(expectedMessage);
+	assertThat(actualMessage).isEqualTo(expectedMessage);
   }
 }

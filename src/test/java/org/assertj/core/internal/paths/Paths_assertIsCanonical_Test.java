@@ -46,7 +46,7 @@ public class Paths_assertIsCanonical_Test extends MockPathsBaseTest {
 	  fail("Expected a PathsException here");
 	} catch (PathsException e) {
 	  assertThat(e).hasMessage(String.format(Paths.IOERROR_FORMAT, actual));
-	  assertThat(e.getCause()).isSameAs(e.getCause());
+	  assertThat(e.getCause()).isSameAs(exception);
 	}
   }
 

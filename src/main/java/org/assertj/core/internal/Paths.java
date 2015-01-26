@@ -44,6 +44,10 @@ import static org.assertj.core.error.ShouldStartWithPath.shouldStartWith;
  */
 public class Paths
 {
+  private static final String FAILED_TO_RESOLVE_ARGUMENT_REAL_PATH = "failed to resolve argument real path";
+
+  private static final String FAILED_TO_RESOLVE_ACTUAL_REAL_PATH = "failed to resolve actual real path";
+
   @VisibleForTesting
   public static final String IOERROR_FORMAT = "I/O error attempting to process assertion for path: <%s>";
 
@@ -115,14 +119,14 @@ public class Paths
 	try {
 	  canonicalActual = actual.toRealPath();
 	} catch (IOException e) {
-	  throw new PathsException("failed to resolve actual", e);
+	  throw new PathsException(FAILED_TO_RESOLVE_ACTUAL_REAL_PATH, e);
 	}
 
 	final Path canonicalExpected;
 	try {
 	  canonicalExpected = expected.toRealPath();
 	} catch (IOException e) {
-	  throw new PathsException("failed to resolve path argument", e);
+	  throw new PathsException(FAILED_TO_RESOLVE_ARGUMENT_REAL_PATH, e);
 	}
 
 	final Path actualParent = canonicalActual.getParent();
@@ -151,7 +155,7 @@ public class Paths
 	  final Path canonicalActual = actual.toRealPath();
 	  if (canonicalActual.getParent() != null) throw failures.failure(info, shouldHaveNoParent(actual));
 	} catch (IOException e) {
-	  throw new PathsException("cannot resolve actual path", e);
+	  throw new PathsException(FAILED_TO_RESOLVE_ACTUAL_REAL_PATH, e);
 	}
   }
 
@@ -168,16 +172,16 @@ public class Paths
 	try {
 	  canonicalActual = actual.toRealPath();
 	} catch (IOException e) {
-	  throw new PathsException("failed to resolve actual", e);
+	  throw new PathsException(FAILED_TO_RESOLVE_ACTUAL_REAL_PATH, e);
 	}
 
 	final Path canonicalOther;
 	try {
 	  canonicalOther = start.toRealPath();
 	} catch (IOException e) {
-	  throw new PathsException("failed to resolve path argument", e);
+	  throw new PathsException(FAILED_TO_RESOLVE_ARGUMENT_REAL_PATH, e);
 	}
-
+ 
 	if (!canonicalActual.startsWith(canonicalOther)) throw failures.failure(info, shouldStartWith(actual, start));
   }
 
@@ -202,7 +206,7 @@ public class Paths
 	  final Path canonicalActual = actual.toRealPath();
 	  if (!canonicalActual.endsWith(end.normalize())) throw failures.failure(info, shouldEndWith(actual, end));
 	} catch (IOException e) {
-	  throw new PathsException("cannot resolve actual path", e);
+	  throw new PathsException(FAILED_TO_RESOLVE_ACTUAL_REAL_PATH, e);
 	}
   }
 

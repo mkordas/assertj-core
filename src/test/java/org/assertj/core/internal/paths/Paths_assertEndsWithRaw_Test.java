@@ -17,26 +17,12 @@ import static org.assertj.core.error.ShouldEndWithPath.shouldEndWith;
 import static org.assertj.core.test.TestFailures.wasExpectingAssertionError;
 import static org.assertj.core.util.FailureMessages.actualIsNull;
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.nio.file.Path;
-
-import org.assertj.core.internal.PathsBaseTest;
-import org.junit.Before;
 import org.junit.Test;
 
-public class Paths_assertEndsWithRaw_Test extends PathsBaseTest {
-
-  private Path actual;
-  private Path other;
-
-  @Before
-  public void init() {
-	actual = mock(Path.class);
-	other = mock(Path.class);
-  }
+public class Paths_assertEndsWithRaw_Test extends MockPathsBaseTest {
 
   @Test
   public void should_fail_if_actual_is_null() {
