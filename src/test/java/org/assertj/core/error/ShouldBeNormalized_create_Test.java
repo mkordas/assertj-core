@@ -12,45 +12,27 @@
  */
 package org.assertj.core.error;
 
-import org.assertj.core.internal.TestDescription;
-import org.assertj.core.presentation.Representation;
-import org.assertj.core.presentation.StandardRepresentation;
-import org.junit.Before;
-import org.junit.Test;
-
-import java.nio.file.Path;
-
-import static junit.framework.Assert.assertEquals;
+import static java.lang.String.format;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.error.ShouldBeNormalized.SHOULD_BE_NORMALIZED;
 import static org.assertj.core.error.ShouldBeNormalized.shouldBeNormalized;
 import static org.mockito.Mockito.mock;
 
-public class ShouldBeNormalized_create_Test
-{
-    private TestDescription description;
-    private Representation representation;
+import java.nio.file.Path;
 
-    private ErrorMessageFactory factory;
-    private String actualMessage;
-    private String expectedMessage;
+import org.assertj.core.description.TextDescription;
+import org.assertj.core.presentation.StandardRepresentation;
+import org.junit.Test;
 
-    @Before
-    public void setup()
-    {
-        description = new TestDescription("Test");
-        representation = new StandardRepresentation();
-    }
+public class ShouldBeNormalized_create_Test {
+  
+  @Test
+  public void should_create_error_message() {
+	final Path actual = mock(Path.class);
 
-    @Test
-    public void should_create_error_message()
-    {
-        final Path actual = mock(Path.class);
+	ErrorMessageFactory factory = shouldBeNormalized(actual);
+	String actualMessage = factory.create(new TextDescription("Test"), new StandardRepresentation());
 
-        factory = shouldBeNormalized(actual);
-        actualMessage = factory.create(description, representation);
-
-        expectedMessage = String.format("[Test] " + SHOULD_BE_NORMALIZED, actual);
-
-        assertEquals(expectedMessage, actualMessage);
-    }
+	assertThat(actualMessage).isEqualTo(format("[Test] " + SHOULD_BE_NORMALIZED, actual));
+  }
 }

@@ -107,7 +107,7 @@ public class Paths
 	try {
 	  if (!actual.equals(actual.toRealPath())) throw failures.failure(info, shouldBeCanonicalPath(actual));
 	} catch (IOException e) {
-	  throw new PathsException(String.format(IOERROR_FORMAT, actual), e);
+	  throw new PathsException(FAILED_TO_RESOLVE_ACTUAL_REAL_PATH, e);
 	}
   }
 

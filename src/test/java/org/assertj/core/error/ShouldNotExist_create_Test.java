@@ -12,21 +12,23 @@
  */
 package org.assertj.core.error;
 
-import org.assertj.core.internal.TestDescription;
-import org.assertj.core.presentation.StandardRepresentation;
-import org.junit.Before;
-import org.junit.Test;
-
-import java.nio.file.Path;
-
-import static junit.framework.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.error.ShouldNotExist.FILE_SHOULDNOTEXIST;
 import static org.assertj.core.error.ShouldNotExist.PATH_SHOULDNOTEXIST;
 import static org.assertj.core.error.ShouldNotExist.shouldNotExist;
 import static org.mockito.Mockito.mock;
 
+import java.nio.file.Path;
+
+import org.assertj.core.internal.TestDescription;
+import org.assertj.core.presentation.StandardRepresentation;
+import org.junit.Before;
+import org.junit.Test;
+
 /**
- * Tests for <code>{@link ShouldNotExist#create(org.assertj.core.description.Description, org.assertj.core.presentation.Representation)}</code>.
+ * Tests for
+ * <code>{@link ShouldNotExist#create(org.assertj.core.description.Description, org.assertj.core.presentation.Representation)}</code>
+ * .
  * 
  * @author Yvonne Wang
  */
@@ -41,31 +43,31 @@ public class ShouldNotExist_create_Test {
 
   @Before
   public void setUp() {
-    description = new TestDescription("Test");
-    representation = new StandardRepresentation();
+	description = new TestDescription("Test");
+	representation = new StandardRepresentation();
   }
 
   @Test
   public void should_create_error_message_for_File_object() {
-    final FakeFile file = new FakeFile("xyz");
+	final FakeFile file = new FakeFile("xyz");
 
-    factory = shouldNotExist(file);
-    actualMessage = factory.create(description, representation);
+	factory = shouldNotExist(file);
+	actualMessage = factory.create(description, representation);
 
-    expectedMessage = String.format("[Test] " + FILE_SHOULDNOTEXIST, file);
+	expectedMessage = String.format("[Test] " + FILE_SHOULDNOTEXIST, file);
 
-    assertEquals(expectedMessage, actualMessage);
+	assertThat(actualMessage).isEqualTo(expectedMessage);
   }
 
   @Test
   public void should_create_error_message_for_Path_object() {
-    final Path path = mock(Path.class);
+	final Path path = mock(Path.class);
 
-    factory = shouldNotExist(path);
-    actualMessage = factory.create(description, representation);
+	factory = shouldNotExist(path);
+	actualMessage = factory.create(description, representation);
 
-    expectedMessage = String.format("[Test] " + PATH_SHOULDNOTEXIST, path);
+	expectedMessage = String.format("[Test] " + PATH_SHOULDNOTEXIST, path);
 
-    assertEquals(expectedMessage, actualMessage);
+	assertThat(actualMessage).isEqualTo(expectedMessage);
   }
 }

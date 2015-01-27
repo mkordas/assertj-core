@@ -33,33 +33,31 @@ public class Paths_assertIsRegularFile_Test extends PathsBaseTest {
   @ClassRule
   public static FileSystemResource resource = new FileSystemResource();
 
-  private static Path regularFile;
-  private static Path symlink;
-
-  private static Path nonExisting;
-  private static Path dangling;
-
-  private static Path directory;
-  private static Path dirSymlink;
-
+  private static Path existingFile;
+  private static Path symlinkToExistingFile;
+  private static Path nonExistingPath;
+  private static Path symlinkToNonExistingPath;
+  private static Path existingDirectory;
+  private static Path symlinkToExistingDirectory;
+  
   @BeforeClass
   public static void initPaths() throws IOException {
 
 	final FileSystem fs = resource.getFileSystem();
 
-	regularFile = fs.getPath("/existing");
-	symlink = fs.getPath("/symlinkToExisting");
-	Files.createFile(regularFile);
-	Files.createSymbolicLink(symlink, regularFile);
+	existingFile = fs.getPath("/existingFile");
+	symlinkToExistingFile = fs.getPath("/symlinkToExistingFile");
+	Files.createFile(existingFile);
+	Files.createSymbolicLink(symlinkToExistingFile, existingFile);
 
-	nonExisting = fs.getPath("/nonExisting");
-	dangling = fs.getPath("/symlinkToNonExisting");
-	Files.createSymbolicLink(dangling, nonExisting);
+	nonExistingPath = fs.getPath("/nonExistingPath");
+	symlinkToNonExistingPath = fs.getPath("/symlinkToNonExistingPath");
+	Files.createSymbolicLink(symlinkToNonExistingPath, nonExistingPath);
 
-	directory = fs.getPath("/dir");
-	dirSymlink = fs.getPath("/dirsymlink");
-	Files.createDirectory(directory);
-	Files.createSymbolicLink(dirSymlink, directory);
+	existingDirectory = fs.getPath("/existingDirectory");
+	symlinkToExistingDirectory = fs.getPath("/symlinkToExistingDirectory");
+	Files.createDirectory(existingDirectory);
+	Files.createSymbolicLink(symlinkToExistingDirectory, existingDirectory);
   }
 
   @Test
@@ -69,52 +67,52 @@ public class Paths_assertIsRegularFile_Test extends PathsBaseTest {
   }
 
   @Test
-  public void should_fail_with_notexists_if_actual_does_not_exist() {
+  public void should_fail_with_should_exist_error_if_actual_does_not_exist() {
 	try {
-	  paths.assertIsRegularFile(info, nonExisting);
+	  paths.assertIsRegularFile(info, nonExistingPath);
 	  wasExpectingAssertionError();
 	} catch (AssertionError e) {
-	  verify(failures).failure(info, shouldExist(nonExisting));
+	  verify(failures).failure(info, shouldExist(nonExistingPath));
 	}
   }
 
   @Test
-  public void should_fail_with_notexists_if_actual_is_dangling_symlink() {
+  public void should_fail_with_should_exist_error_if_actual_is_a_symlink_to_a_non_existing_path() {
 	try {
-	  paths.assertIsRegularFile(info, dangling);
+	  paths.assertIsRegularFile(info, symlinkToNonExistingPath);
 	  wasExpectingAssertionError();
 	} catch (AssertionError e) {
-	  verify(failures).failure(info, shouldExist(dangling));
+	  verify(failures).failure(info, shouldExist(symlinkToNonExistingPath));
 	}
   }
 
   @Test
-  public void should_fail_if_target_is_directory() {
+  public void should_fail_if_target_is_an_existing_directory() {
 	try {
-	  paths.assertIsRegularFile(info, directory);
+	  paths.assertIsRegularFile(info, existingDirectory);
 	  wasExpectingAssertionError();
 	} catch (AssertionError e) {
-	  verify(failures).failure(info, shouldBeRegularFile(directory));
+	  verify(failures).failure(info, shouldBeRegularFile(existingDirectory));
 	}
   }
 
   @Test
-  public void should_fail_if_target_is_symlink_pointing_to_directory() {
+  public void should_fail_if_target_is_symlink_to_an_existing_directory() {
 	try {
-	  paths.assertIsRegularFile(info, dirSymlink);
+	  paths.assertIsRegularFile(info, symlinkToExistingDirectory);
 	  wasExpectingAssertionError();
 	} catch (AssertionError e) {
-	  verify(failures).failure(info, shouldBeRegularFile(dirSymlink));
+	  verify(failures).failure(info, shouldBeRegularFile(symlinkToExistingDirectory));
 	}
   }
 
   @Test
-  public void should_succeed_if_actual_is_symlink_pointing_to_regular_file() {
-	paths.assertIsRegularFile(info, symlink);
+  public void should_succeed_if_actual_is_symlink_to_an_existing_regular_file() {
+	paths.assertIsRegularFile(info, symlinkToExistingFile);
   }
 
   @Test
-  public void should_succeed_if_actual_is_regular_file() {
-	paths.assertIsRegularFile(info, regularFile);
+  public void should_succeed_if_actual_is_an_existing_regular_file() {
+	paths.assertIsRegularFile(info, existingFile);
   }
 }

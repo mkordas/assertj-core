@@ -28,8 +28,7 @@ import java.nio.file.Path;
 public class ShouldBeAbsolutePath extends BasicErrorMessageFactory {
 
   @VisibleForTesting
-  public static final String MESSAGE
-      = "%nExpecting:%n  <%s>%nto be an absolute path";
+  public static final String SHOULD_BE_ABSOLUTE_PATH = "%nExpecting:%n  <%s>%nto be an absolute path.";
 
   /**
    * Creates a new <code>{@link ShouldBeAbsolutePath}</code>.
@@ -40,17 +39,15 @@ public class ShouldBeAbsolutePath extends BasicErrorMessageFactory {
     return new ShouldBeAbsolutePath(actual);
   }
 
-  public static ErrorMessageFactory shouldBeAbsolutePath(final Path actual)
-  {
+  public static ErrorMessageFactory shouldBeAbsolutePath(final Path actual) {
     return new ShouldBeAbsolutePath(actual);
   }
 
   private ShouldBeAbsolutePath(File actual) {
-    super(MESSAGE, actual);
+    super(SHOULD_BE_ABSOLUTE_PATH, actual);
   }
 
-  private ShouldBeAbsolutePath(final Path actual)
-  {
-    super(MESSAGE, actual);
+  private ShouldBeAbsolutePath(final Path actual) {
+    super(SHOULD_BE_ABSOLUTE_PATH, actual);
   }
 }

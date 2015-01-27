@@ -56,7 +56,6 @@ public class ShouldHaveParent extends BasicErrorMessageFactory {
     return new ShouldHaveParent(actual, actualParent, expected);
   }
 
-
   private ShouldHaveParent(File actual, File expected) {
     super(FILE_NO_PARENT, actual, expected);
   }

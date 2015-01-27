@@ -74,7 +74,7 @@ import java.nio.file.spi.FileSystemProvider;
  * @see Files
  */
 public abstract class AbstractPathAssert<S extends AbstractPathAssert<S>> extends AbstractAssert<S, Path> {
-  
+
   @VisibleForTesting
   protected Paths paths = Paths.instance();
 
@@ -464,7 +464,8 @@ public abstract class AbstractPathAssert<S extends AbstractPathAssert<S>> extend
   }
 
   /**
-   * Assert that the tested {@link Path} is canonical.
+   * Assert that the tested {@link Path} is canonical by comparing it to its {@link Path#toRealPath(LinkOption...) real
+   * path}.
    *
    * <p>
    * For Windows users, this assertion is no different than {@link #isAbsolute()}. For Unix users, this assertion

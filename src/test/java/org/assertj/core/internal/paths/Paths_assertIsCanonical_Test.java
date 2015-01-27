@@ -24,7 +24,6 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.nio.file.Path;
 
-import org.assertj.core.internal.Paths;
 import org.assertj.core.util.PathsException;
 import org.junit.Test;
 
@@ -37,7 +36,7 @@ public class Paths_assertIsCanonical_Test extends MockPathsBaseTest {
   }
 
   @Test
-  public void should_throw_pathsexception_on_io_error() throws IOException {
+  public void should_throw_PathsException_on_io_error() throws IOException {
 	final IOException exception = new IOException();
 	when(actual.toRealPath()).thenThrow(exception);
 
@@ -45,13 +44,13 @@ public class Paths_assertIsCanonical_Test extends MockPathsBaseTest {
 	  paths.assertIsCanonical(info, actual);
 	  fail("Expected a PathsException here");
 	} catch (PathsException e) {
-	  assertThat(e).hasMessage(String.format(Paths.IOERROR_FORMAT, actual));
+	  assertThat(e).hasMessage("failed to resolve actual real path");
 	  assertThat(e.getCause()).isSameAs(exception);
 	}
   }
 
   @Test
-  public void should_fail_if_real_path_differs_from_actual() throws IOException {
+  public void should_fail_if_actual_real_path_differs_from_actual() throws IOException {
 	final Path other = mock(Path.class);
 	when(actual.toRealPath()).thenReturn(other);
 
@@ -64,7 +63,7 @@ public class Paths_assertIsCanonical_Test extends MockPathsBaseTest {
   }
 
   @Test
-  public void should_succeed_if_real_path_is_same_as_actual() throws IOException {
+  public void should_succeed_if_actual_real_path_is_same_as_actual() throws IOException {
 	when(actual.toRealPath()).thenReturn(actual);
 	paths.assertIsCanonical(info, actual);
   }

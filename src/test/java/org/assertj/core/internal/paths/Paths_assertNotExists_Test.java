@@ -32,21 +32,25 @@ public class Paths_assertNotExists_Test extends PathsBaseTest {
   @ClassRule
   public static FileSystemResource resource = new FileSystemResource();
 
-  private static Path existing;
-  private static Path symlink;
-  private static Path nonExisting;
+  private static Path existingFile;
+  private static Path symlinkToExistingFile;
+  private static Path nonExistingPath;
+  private static Path existingDirectory;
 
   @BeforeClass
   public static void initPaths() throws IOException {
 
 	final FileSystem fs = resource.getFileSystem();
 
-	existing = fs.getPath("/existing");
-	Files.createFile(existing);
-	nonExisting = fs.getPath("/nonExisting");
+	existingFile = fs.getPath("/existing");
+	Files.createFile(existingFile);
+	nonExistingPath = fs.getPath("/nonExisting");
 
-	symlink = fs.getPath("/symlinkToExisting");
-	Files.createSymbolicLink(symlink, nonExisting);
+	symlinkToExistingFile = fs.getPath("/symlinkToExisting");
+	Files.createSymbolicLink(symlinkToExistingFile, nonExistingPath);
+
+	existingDirectory = fs.getPath("/existingDirectory");
+	Files.createDirectory(existingDirectory);
   }
 
   @Test
@@ -56,27 +60,37 @@ public class Paths_assertNotExists_Test extends PathsBaseTest {
   }
 
   @Test
-  public void should_fail_if_actual_exists() {
+  public void should_fail_if_actual_is_an_existing_file() {
 	try {
-	  paths.assertDoesNotExist(info, existing);
+	  paths.assertDoesNotExist(info, existingFile);
 	  wasExpectingAssertionError();
 	} catch (AssertionError e) {
-	  verify(failures).failure(info, shouldNotExist(existing));
+	  verify(failures).failure(info, shouldNotExist(existingFile));
 	}
   }
 
   @Test
-  public void should_fail_even_if_actual_is_dangling_symlink() {
+  public void should_fail_if_actual_is_an_existing_directory() {
 	try {
-	  paths.assertDoesNotExist(info, symlink);
+	  paths.assertDoesNotExist(info, existingDirectory);
 	  wasExpectingAssertionError();
 	} catch (AssertionError e) {
-	  verify(failures).failure(info, shouldNotExist(symlink));
+	  verify(failures).failure(info, shouldNotExist(existingDirectory));
+	}
+  }
+  
+  @Test
+  public void should_fail_even_if_actual_is_a_symlink_to_a_non_existing_path() {
+	try {
+	  paths.assertDoesNotExist(info, symlinkToExistingFile);
+	  wasExpectingAssertionError();
+	} catch (AssertionError e) {
+	  verify(failures).failure(info, shouldNotExist(symlinkToExistingFile));
 	}
   }
 
   @Test
   public void should_pass_if_actual_does_not_exist() {
-	paths.assertDoesNotExist(info, nonExisting);
+	paths.assertDoesNotExist(info, nonExistingPath);
   }
 }

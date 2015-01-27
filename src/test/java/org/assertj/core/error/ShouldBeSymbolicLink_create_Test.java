@@ -12,45 +12,27 @@
  */
 package org.assertj.core.error;
 
-import org.assertj.core.internal.TestDescription;
-import org.assertj.core.presentation.StandardRepresentation;
-import org.junit.Before;
-import org.junit.Test;
-
-import java.nio.file.Path;
-
-import static junit.framework.Assert.assertEquals;
+import static java.lang.String.format;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.error.ShouldBeSymbolicLink.SHOULD_BE_SYMBOLIC_LINK;
 import static org.assertj.core.error.ShouldBeSymbolicLink.shouldBeSymbolicLink;
 import static org.mockito.Mockito.mock;
 
-public class ShouldBeSymbolicLink_create_Test
-{
-  private TestDescription description;
-  private StandardRepresentation representation;
+import java.nio.file.Path;
 
-  private ErrorMessageFactory factory;
-  private String actualMessage;
-  private String expectedMessage;
+import org.assertj.core.description.TextDescription;
+import org.assertj.core.presentation.StandardRepresentation;
+import org.junit.Test;
 
-  @Before
-  public void setUp()
-  {
-    description = new TestDescription("Test");
-    representation = new StandardRepresentation();
-  }
+public class ShouldBeSymbolicLink_create_Test {
 
   @Test
-  public void should_create_error_message()
-  {
-    final Path actual = mock(Path.class);
+  public void should_create_error_message() {
+	final Path actual = mock(Path.class);
+	ErrorMessageFactory factory = shouldBeSymbolicLink(actual);
+	
+	String actualMessage = factory.create(new TextDescription("Test"), new StandardRepresentation());
 
-    factory = shouldBeSymbolicLink(actual);
-    actualMessage = factory.create(description, representation);
-
-    expectedMessage = String.format("[Test] " + SHOULD_BE_SYMBOLIC_LINK,
-        actual);
-
-    assertEquals(expectedMessage, actualMessage);
+	assertThat(actualMessage).isEqualTo(format("[Test] " + SHOULD_BE_SYMBOLIC_LINK, actual));
   }
 }

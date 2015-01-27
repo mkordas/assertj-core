@@ -16,8 +16,8 @@ import org.assertj.core.util.VisibleForTesting;
 
 import java.nio.file.Path;
 
-public class ShouldStartWithPath extends BasicErrorMessageFactory
-{
+public class ShouldStartWithPath extends BasicErrorMessageFactory {
+  
   @VisibleForTesting
   public static final String PATH_SHOULD_START_WITH = "%nExpected path:%n  <%s>%nto start with:%n  <%s>%nbut it did not.";
 

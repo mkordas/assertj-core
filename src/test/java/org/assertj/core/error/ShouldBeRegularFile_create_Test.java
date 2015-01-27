@@ -12,44 +12,27 @@
  */
 package org.assertj.core.error;
 
-import org.assertj.core.internal.TestDescription;
-import org.assertj.core.presentation.StandardRepresentation;
-import org.junit.Before;
-import org.junit.Test;
-
-import java.nio.file.Path;
-
-import static junit.framework.Assert.assertEquals;
+import static java.lang.String.format;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.error.ShouldBeRegularFile.SHOULD_BE_REGULAR_FILE;
 import static org.assertj.core.error.ShouldBeRegularFile.shouldBeRegularFile;
 import static org.mockito.Mockito.mock;
 
-public class ShouldBeRegularFile_create_Test
-{
-  private TestDescription description;
-  private StandardRepresentation representation;
+import java.nio.file.Path;
 
-  private ErrorMessageFactory factory;
-  private String actualMessage;
-  private String expectedMessage;
+import org.assertj.core.description.TextDescription;
+import org.assertj.core.presentation.StandardRepresentation;
+import org.junit.Test;
 
-  @Before
-  public void setUp()
-  {
-    description = new TestDescription("Test");
-    representation = new StandardRepresentation();
-  }
-
+public class ShouldBeRegularFile_create_Test {
+  
   @Test
-  public void should_create_error_message()
-  {
+  public void should_create_error_message() {
     final Path actual = mock(Path.class);
 
-    factory = shouldBeRegularFile(actual);
-    actualMessage = factory.create(description, representation);
+    ErrorMessageFactory factory = shouldBeRegularFile(actual);
+    String actualMessage = factory.create(new TextDescription("Test"), new StandardRepresentation());
 
-    expectedMessage = String.format("[Test] " + SHOULD_BE_REGULAR_FILE, actual);
-
-    assertEquals(expectedMessage, actualMessage);
+    assertThat(actualMessage).isEqualTo(format("[Test] " + SHOULD_BE_REGULAR_FILE, actual));
   }
 }

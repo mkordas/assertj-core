@@ -12,18 +12,19 @@
  */
 package org.assertj.core.error;
 
+import static java.lang.String.format;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.error.ShouldBeAbsolutePath.SHOULD_BE_ABSOLUTE_PATH;
+import static org.assertj.core.error.ShouldBeAbsolutePath.shouldBeAbsolutePath;
+import static org.mockito.Mockito.mock;
+
+import java.nio.file.Path;
+
 import org.assertj.core.description.Description;
 import org.assertj.core.internal.TestDescription;
 import org.assertj.core.presentation.StandardRepresentation;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.nio.file.Path;
-
-import static junit.framework.Assert.assertEquals;
-import static org.assertj.core.error.ShouldBeAbsolutePath.MESSAGE;
-import static org.assertj.core.error.ShouldBeAbsolutePath.shouldBeAbsolutePath;
-import static org.mockito.Mockito.mock;
 
 /**
  * Tests for <code>{@link ShouldBeAbsolutePath#create(Description, org.assertj.core.presentation.Representation)}</code>.
@@ -37,7 +38,6 @@ public class ShouldBeAbsolutePath_create_Test {
 
   private ErrorMessageFactory factory;
   private String actualMessage;
-  private String expectedMessage;
 
   @Before
   public void setUp() {
@@ -52,20 +52,16 @@ public class ShouldBeAbsolutePath_create_Test {
     factory = shouldBeAbsolutePath(file);
     actualMessage = factory.create(description, representation);
 
-    expectedMessage = String.format("[Test] " + MESSAGE, file);
-
-    assertEquals(expectedMessage, actualMessage);
+    assertThat(actualMessage).isEqualTo(format("[Test] " + SHOULD_BE_ABSOLUTE_PATH, file));
   }
 
   @Test
   public void should_create_error_message_for_Path_object() {
-    final Path actual = mock(Path.class);
+    final Path path = mock(Path.class);
 
-    factory = shouldBeAbsolutePath(actual);
+    factory = shouldBeAbsolutePath(path);
     actualMessage = factory.create(description, representation);
 
-    expectedMessage = String.format("[Test] " + MESSAGE, actual);
-
-    assertEquals(expectedMessage, actualMessage);
+    assertThat(actualMessage).isEqualTo(format("[Test] " + SHOULD_BE_ABSOLUTE_PATH, path));
   }
 }

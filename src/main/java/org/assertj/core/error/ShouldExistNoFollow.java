@@ -18,24 +18,19 @@ import java.io.File;
 import java.nio.file.Path;
 
 /**
- * Creates an error message indicating that an assertion that verifies that a
- * {@link File} or {@link Path} exists failed.
- * 
+ * Creates an error message indicating that an assertion that verifies that a {@link File} or {@link Path} exists
+ * failed.
  */
-public class ShouldExistNoFollow
-    extends BasicErrorMessageFactory
-{
-    @VisibleForTesting
-    public static final String PATH_SHOULD_EXIST_NOFOLLOW
-        = "Expecting path:%n  <%s>%nto exist (symbolic links not followed)";
+public class ShouldExistNoFollow extends BasicErrorMessageFactory {
 
-    public static ErrorMessageFactory shouldExistNoFollow(final Path actual)
-    {
-        return new ShouldExistNoFollow(actual);
-    }
+  @VisibleForTesting
+  public static final String PATH_SHOULD_EXIST_NOFOLLOW = "Expecting path:%n  <%s>%nto exist (symbolic links not followed)";
 
-    private ShouldExistNoFollow(final Path actual)
-    {
-        super(PATH_SHOULD_EXIST_NOFOLLOW, actual);
-    }
+  public static ErrorMessageFactory shouldExistNoFollow(final Path actual) {
+	return new ShouldExistNoFollow(actual);
+  }
+
+  private ShouldExistNoFollow(final Path actual) {
+	super(PATH_SHOULD_EXIST_NOFOLLOW, actual);
+  }
 }

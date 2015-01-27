@@ -25,7 +25,7 @@ public class ShouldBeCanonicalPath
     extends BasicErrorMessageFactory
 {
     @VisibleForTesting
-    public static final String MESSAGE
+    public static final String SHOULD_BE_CANONICAL
         = "%nExpecting:%n  <%s>%nto be a canonical path";
 
     public static ErrorMessageFactory shouldBeCanonicalPath(final Path actual)
@@ -35,6 +35,6 @@ public class ShouldBeCanonicalPath
 
     private ShouldBeCanonicalPath(final Path actual)
     {
-        super(MESSAGE, actual);
+        super(SHOULD_BE_CANONICAL, actual);
     }
 }

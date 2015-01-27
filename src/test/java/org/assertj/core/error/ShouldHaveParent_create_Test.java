@@ -69,7 +69,7 @@ public class ShouldHaveParent_create_Test
         expectedMessage = String.format("[Test] " + FILE_NO_PARENT,
             actual, expectedFileParent);
 
-        assertThat(expectedMessage).isEqualTo(actualMessage);
+        assertThat(actualMessage).isEqualTo(expectedMessage);
     }
 
     @Test

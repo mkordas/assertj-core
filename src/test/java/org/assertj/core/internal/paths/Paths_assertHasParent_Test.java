@@ -49,7 +49,7 @@ public class Paths_assertHasParent_Test extends MockPathsBaseTest {
   }
 
   @Test
-  public void should_fail_if_provided_parent_is_null() {
+  public void should_fail_if_given_parent_is_null() {
 	try {
 	  paths.assertHasParent(info, actual, null);
 	  fail("expected a NullPointerException here");
@@ -100,8 +100,7 @@ public class Paths_assertHasParent_Test extends MockPathsBaseTest {
 	  paths.assertHasParent(info, actual, expected);
 	  wasExpectingAssertionError();
 	} catch (AssertionError e) {
-	  verify(failures).failure(info,
-		                       shouldHaveParent(actual, expected));
+	  verify(failures).failure(info, shouldHaveParent(actual, expected));
 	}
   }
 
@@ -118,8 +117,7 @@ public class Paths_assertHasParent_Test extends MockPathsBaseTest {
 	  paths.assertHasParent(info, actual, expected);
 	  wasExpectingAssertionError();
 	} catch (AssertionError e) {
-	  verify(failures).failure(info,
-		                       shouldHaveParent(actual, actualParent, expected));
+	  verify(failures).failure(info, shouldHaveParent(actual, actualParent, expected));
 	}
   }
 
