@@ -82,6 +82,12 @@ public abstract class AbstractPathAssert<S extends AbstractPathAssert<S>> extend
 	super(actual, selfType);
   }
 
+  // TODO isReadable
+  // TODO isWritable
+  // TODO isExecutable
+  // TODO hasFileName
+  // TODO containsName ?
+
   /**
    * Assert that the tested {@link Path} exists.
    *
@@ -422,10 +428,46 @@ public abstract class AbstractPathAssert<S extends AbstractPathAssert<S>> extend
    * @return self
    *
    * @see Path#isAbsolute()
-   * @see Path#toRealPath(LinkOption...)
    */
   public S isAbsolute() {
 	paths.assertIsAbsolute(info, actual);
+	return myself;
+  }
+
+  /**
+   * Assert that the tested {@link Path} is relative (opposite to {@link Path#isAbsolute()}).
+   *
+   * <p>
+   * Examples:
+   * </p>
+   * 
+   * <pre><code class="java">
+   * // unixFs is a Unix FileSystem
+   *
+   * // The following assertions succeed:
+   * assertThat(unixFs.getPath("./foo/bar")).isRelative();
+   * assertThat(unixFs.getPath("foo/bar")).isRelative();
+   *
+   * // The following assertion fails:
+   * assertThat(unixFs.getPath("/foo/bar")).isRelative();
+   *
+   * // windowsFs is a Windows FileSystem
+   *
+   * // The following assertion succeeds:
+   * assertThat(windowsFs.getPath("foo\\bar")).isRelative();
+   * assertThat(windowsFs.getPath("c:foo")).isRelative();
+   * assertThat(windowsFs.getPath("\\foo\\bar")).isRelative();
+   *
+   * // The following assertions fail:
+   * assertThat(windowsFs.getPath("c:\\foo")).isRelative();
+   * </code></pre>
+   *
+   * @return self
+   *
+   * @see Path#isAbsolute()
+   */
+  public S isRelative() {
+	paths.assertIsRelative(info, actual);
 	return myself;
   }
 
@@ -724,6 +766,7 @@ public abstract class AbstractPathAssert<S extends AbstractPathAssert<S>> extend
    * @throws PathsException failed to canonicalize the tested path or the path given as an argument
    *
    * @see Path#startsWith(Path)
+   * @see Path#toRealPath(LinkOption...)
    */
   public S startsWith(final Path other) {
 	paths.assertStartsWith(info, actual, other);
@@ -816,6 +859,9 @@ public abstract class AbstractPathAssert<S extends AbstractPathAssert<S>> extend
    *
    * @throws PathsException failed to canonicalize the tested path (see class
    *           description)
+   * 
+   * @see Path#endsWith(Path)
+   * @see Path#toRealPath(LinkOption...)
    */
   public S endsWith(final Path other) {
 	paths.assertEndsWith(info, actual, other);
@@ -858,6 +904,8 @@ public abstract class AbstractPathAssert<S extends AbstractPathAssert<S>> extend
    *
    * @param other the other path
    * @return self
+   * 
+   * @see Path#endsWith(Path)
    */
   public S endsWithRaw(final Path other) {
 	paths.assertEndsWithRaw(info, actual, other);

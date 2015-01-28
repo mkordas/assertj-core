@@ -12,14 +12,6 @@
  */
 package org.assertj.core.internal;
 
-import org.assertj.core.api.AssertionInfo;
-import org.assertj.core.util.PathsException;
-import org.assertj.core.util.VisibleForTesting;
-
-import java.io.IOException;
-import java.nio.file.LinkOption;
-import java.nio.file.Path;
-
 import static java.nio.file.Files.exists;
 import static java.nio.file.Files.isDirectory;
 import static java.nio.file.Files.isRegularFile;
@@ -30,6 +22,7 @@ import static org.assertj.core.error.ShouldBeCanonicalPath.shouldBeCanonicalPath
 import static org.assertj.core.error.ShouldBeDirectory.shouldBeDirectory;
 import static org.assertj.core.error.ShouldBeNormalized.shouldBeNormalized;
 import static org.assertj.core.error.ShouldBeRegularFile.shouldBeRegularFile;
+import static org.assertj.core.error.ShouldBeRelativePath.shouldBeRelativePath;
 import static org.assertj.core.error.ShouldBeSymbolicLink.shouldBeSymbolicLink;
 import static org.assertj.core.error.ShouldEndWithPath.shouldEndWith;
 import static org.assertj.core.error.ShouldExist.shouldExist;
@@ -38,6 +31,14 @@ import static org.assertj.core.error.ShouldHaveNoParent.shouldHaveNoParent;
 import static org.assertj.core.error.ShouldHaveParent.shouldHaveParent;
 import static org.assertj.core.error.ShouldNotExist.shouldNotExist;
 import static org.assertj.core.error.ShouldStartWithPath.shouldStartWith;
+
+import java.io.IOException;
+import java.nio.file.LinkOption;
+import java.nio.file.Path;
+
+import org.assertj.core.api.AssertionInfo;
+import org.assertj.core.util.PathsException;
+import org.assertj.core.util.VisibleForTesting;
 
 /**
  * Core assertion class for {@link Path} assertions
@@ -97,6 +98,11 @@ public class Paths
 	if (!actual.isAbsolute()) throw failures.failure(info, shouldBeAbsolutePath(actual));
   }
 
+  public void assertIsRelative(final AssertionInfo info, final Path actual) {
+	assertNotNull(info, actual);
+	if (actual.isAbsolute()) throw failures.failure(info, shouldBeRelativePath(actual));
+  }
+  
   public void assertIsNormalized(final AssertionInfo info, final Path actual) {
 	assertNotNull(info, actual);
 	if (!actual.normalize().equals(actual)) throw failures.failure(info, shouldBeNormalized(actual));
