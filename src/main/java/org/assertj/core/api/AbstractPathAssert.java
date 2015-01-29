@@ -16,6 +16,7 @@ import org.assertj.core.internal.Paths;
 import org.assertj.core.util.PathsException;
 import org.assertj.core.util.VisibleForTesting;
 
+import java.io.IOException;
 import java.nio.file.ClosedFileSystemException;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
@@ -23,6 +24,7 @@ import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.ProviderMismatchException;
+import java.nio.file.attribute.FileAttribute;
 import java.nio.file.spi.FileSystemProvider;
 
 /**
@@ -82,11 +84,53 @@ public abstract class AbstractPathAssert<S extends AbstractPathAssert<S>> extend
 	super(actual, selfType);
   }
 
-  // TODO isReadable
   // TODO isWritable
   // TODO isExecutable
   // TODO hasFileName
   // TODO containsName ?
+
+  /**
+   * Assert that the tested {@link Path} is a readable file, it checks that the file exists and that this Java virtual
+   * machine has appropriate privileges that would allow it open the file for reading.
+   *
+   * <p>
+   * Examples:
+   * </p>
+   *
+   * <pre><code class="java">
+   * // Create a file and set permissions to be readable by all.
+   * Path readableFile = Paths.get("readableFile");
+   * Set&lt;PosixFilePermission&gt; perms = PosixFilePermissions.fromString("r--r--r--");
+   * Files.createFile(readableFile, PosixFilePermissions.asFileAttribute(perms));
+   * 
+   * final Path symlinkToReadableFile = fs.getPath("symlinkToReadableFile");
+   * Files.createSymbolicLink(symlinkToReadableFile, readableFile);
+   * 
+   * // Create a file and set permissions not to be readable.
+   * Path nonReadableFile = Paths.get("nonReadableFile");
+   * Set&lt;PosixFilePermission&gt; perms = PosixFilePermissions.fromString("-wx------");
+   * Files.createFile(nonReadableFile, PosixFilePermissions.asFileAttribute(perms));
+   * 
+   * final Path nonExistentPath = fs.getPath("nonexistent");
+   *
+   * // The following assertions succeed:
+   * assertThat(readableFile).isReadable();
+   * assertThat(symlinkToReadableFile).isReadable();
+   *
+   * // The following assertions fail:
+   * assertThat(nonReadableFile).isReadable();
+   * assertThat(nonExistentPath).isReadable();
+   * </code></pre>
+   *
+   * @return self
+   * @throws IOException
+   *
+   * @see Files#isReadable(Path)
+   */
+  public S isReadable() {
+	paths.assertIsReadable(info, actual);
+	return myself;
+  }
 
   /**
    * Assert that the tested {@link Path} exists.
@@ -118,11 +162,11 @@ public abstract class AbstractPathAssert<S extends AbstractPathAssert<S>> extend
    * final Path symlinkToNonExistentPath = fs.getPath("symlinkToNonExistentPath");
    * Files.createSymbolicLink(symlinkToNonExistentPath, nonExistentPath);
    *
-   * // The following assertions succeed
+   * // The following assertions succeed:
    * assertThat(existingFile).exists();
    * assertThat(symlinkToExistingFile).exists();
    *
-   * // The following assertions fail
+   * // The following assertions fail:
    * assertThat(nonExistentPath).exists();
    * assertThat(symlinkToNonExistentPath).exists();
    * </code></pre>

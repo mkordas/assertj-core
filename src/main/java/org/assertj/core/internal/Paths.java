@@ -21,6 +21,7 @@ import static org.assertj.core.error.ShouldBeAbsolutePath.shouldBeAbsolutePath;
 import static org.assertj.core.error.ShouldBeCanonicalPath.shouldBeCanonicalPath;
 import static org.assertj.core.error.ShouldBeDirectory.shouldBeDirectory;
 import static org.assertj.core.error.ShouldBeNormalized.shouldBeNormalized;
+import static org.assertj.core.error.ShouldBeReadable.shouldBeReadable;
 import static org.assertj.core.error.ShouldBeRegularFile.shouldBeRegularFile;
 import static org.assertj.core.error.ShouldBeRelativePath.shouldBeRelativePath;
 import static org.assertj.core.error.ShouldBeSymbolicLink.shouldBeSymbolicLink;
@@ -46,9 +47,7 @@ import org.assertj.core.util.VisibleForTesting;
 public class Paths
 {
   private static final String FAILED_TO_RESOLVE_ARGUMENT_REAL_PATH = "failed to resolve argument real path";
-
   private static final String FAILED_TO_RESOLVE_ACTUAL_REAL_PATH = "failed to resolve actual real path";
-
   @VisibleForTesting
   public static final String IOERROR_FORMAT = "I/O error attempting to process assertion for path: <%s>";
 
@@ -57,15 +56,32 @@ public class Paths
   @VisibleForTesting
   Failures failures = Failures.instance();
 
+  private NioFilesWrapper nioFilesWrapper;
+
   public static Paths instance() {
 	return INSTANCE;
+  }
+  
+  @VisibleForTesting
+  Paths(NioFilesWrapper nioFilesWrapper) {
+	this.nioFilesWrapper = nioFilesWrapper;
+  }
+  
+  private Paths() {
+	this(NioFilesWrapper.instance());
+  }
+
+  public void assertIsReadable(final AssertionInfo info, final Path actual) {
+	assertNotNull(info, actual);
+	assertExists(info, actual);
+	if (!nioFilesWrapper.isReadable(actual)) throw failures.failure(info, shouldBeReadable(actual));
   }
 
   public void assertExists(final AssertionInfo info, final Path actual) {
 	assertNotNull(info, actual);
-	if (!exists(actual)) throw failures.failure(info, shouldExist(actual));
+	if (!nioFilesWrapper.exists(actual)) throw failures.failure(info, shouldExist(actual));
   }
-
+  
   public void assertExistsNoFollowLinks(final AssertionInfo info, final Path actual) {
 	assertNotNull(info, actual);
 	if (!exists(actual, LinkOption.NOFOLLOW_LINKS)) throw failures.failure(info, shouldExistNoFollow(actual));

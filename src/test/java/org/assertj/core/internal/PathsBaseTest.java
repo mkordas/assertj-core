@@ -14,6 +14,7 @@ package org.assertj.core.internal;
 
 import static org.assertj.core.test.ExpectedException.none;
 import static org.assertj.core.test.TestData.someInfo;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 
 import java.io.File;
@@ -62,6 +63,7 @@ public abstract class PathsBaseTest {
   public ExpectedException thrown = none();
   protected Failures failures;
   protected Paths paths;
+  protected NioFilesWrapper nioFilesWrapper;
   protected AssertionInfo info;
 
   // TODO! uncomment when needed
@@ -71,7 +73,8 @@ public abstract class PathsBaseTest {
   @Before
   public void setUp() throws IOException {
 	failures = spy(new Failures());
-	paths = new Paths();
+	nioFilesWrapper = mock(NioFilesWrapper.class);
+	paths = new Paths(nioFilesWrapper);
 	paths.failures = failures;
 	info = someInfo();
 	// diff = mock(Diff.class);
