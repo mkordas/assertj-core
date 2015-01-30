@@ -12,11 +12,6 @@
  */
 package org.assertj.core.api;
 
-import org.assertj.core.internal.Paths;
-import org.assertj.core.util.PathsException;
-import org.assertj.core.util.VisibleForTesting;
-
-import java.io.IOException;
 import java.nio.file.ClosedFileSystemException;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
@@ -24,8 +19,11 @@ import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.ProviderMismatchException;
-import java.nio.file.attribute.FileAttribute;
 import java.nio.file.spi.FileSystemProvider;
+
+import org.assertj.core.internal.Paths;
+import org.assertj.core.util.PathsException;
+import org.assertj.core.util.VisibleForTesting;
 
 /**
  * Assertions for {@link Path} objects
@@ -84,9 +82,9 @@ public abstract class AbstractPathAssert<S extends AbstractPathAssert<S>> extend
 	super(actual, selfType);
   }
 
-  // TODO isExecutable
   // TODO hasFileName
   // TODO containsName ?
+  // TODO hasContent
 
   /**
    * Assert that the tested {@link Path} is a readable file, it checks that the file exists (according to
@@ -172,6 +170,48 @@ public abstract class AbstractPathAssert<S extends AbstractPathAssert<S>> extend
 	return myself;
   }
   
+  /**
+   * Assert that the tested {@link Path} is a executable file, it checks that the file exists (according to
+   * {@link Files#exists(Path, LinkOption...)}) and that it is executable(according to {@link Files#isExecutable(Path)}).
+   *
+   * <p>
+   * Examples:
+   * </p>
+   *
+   * <pre><code class="java">
+   * // Create a file and set permissions to be executable by all.
+   * Path executableFile = Paths.get("executableFile");
+   * Set&lt;PosixFilePermission&gt; perms = PosixFilePermissions.fromString("r-xr-xr-x");
+   * Files.createFile(executableFile, PosixFilePermissions.asFileAttribute(perms));
+   * 
+   * final Path symlinkToExecutableFile = fs.getPath("symlinkToExecutableFile");
+   * Files.createSymbolicLink(symlinkToExecutableFile, executableFile);
+   * 
+   * // Create a file and set permissions not to be executable.
+   * Path nonExecutableFile = Paths.get("nonExecutableFile");
+   * Set&lt;PosixFilePermission&gt; perms = PosixFilePermissions.fromString("rw-------");
+   * Files.createFile(nonExecutableFile, PosixFilePermissions.asFileAttribute(perms));
+   * 
+   * final Path nonExistentPath = fs.getPath("nonexistent");
+   *
+   * // The following assertions succeed:
+   * assertThat(executableFile).isExecutable();
+   * assertThat(symlinkToExecutableFile).isExecutable();
+   *
+   * // The following assertions fail:
+   * assertThat(nonExecutableFile).isExecutable();
+   * assertThat(nonExistentPath).isExecutable();
+   * </code></pre>
+   *
+   * @return self
+   *
+   * @see Files#isExecutable(Path)
+   */
+  public S isExecutable() {
+	paths.assertIsExecutable(info, actual);
+	return myself;
+  }
+
   /**
    * Assert that the tested {@link Path} exists.
    *

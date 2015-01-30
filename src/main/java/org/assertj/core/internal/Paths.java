@@ -13,13 +13,12 @@
 package org.assertj.core.internal;
 
 import static java.nio.file.Files.exists;
-import static java.nio.file.Files.isDirectory;
-import static java.nio.file.Files.isRegularFile;
 import static java.nio.file.Files.isSymbolicLink;
 import static java.nio.file.Files.notExists;
 import static org.assertj.core.error.ShouldBeAbsolutePath.shouldBeAbsolutePath;
 import static org.assertj.core.error.ShouldBeCanonicalPath.shouldBeCanonicalPath;
 import static org.assertj.core.error.ShouldBeDirectory.shouldBeDirectory;
+import static org.assertj.core.error.ShouldBeExecutable.shouldBeExecutable;
 import static org.assertj.core.error.ShouldBeNormalized.shouldBeNormalized;
 import static org.assertj.core.error.ShouldBeReadable.shouldBeReadable;
 import static org.assertj.core.error.ShouldBeRegularFile.shouldBeRegularFile;
@@ -84,6 +83,12 @@ public class Paths
 	if (!nioFilesWrapper.isWritable(actual)) throw failures.failure(info, shouldBeWritable(actual));
   }
 
+  public void assertIsExecutable(final AssertionInfo info, final Path actual) {
+	assertNotNull(info, actual);
+	assertExists(info, actual);
+	if (!nioFilesWrapper.isExecutable(actual)) throw failures.failure(info, shouldBeExecutable(actual));
+  }
+  
   public void assertExists(final AssertionInfo info, final Path actual) {
 	assertNotNull(info, actual);
 	if (!nioFilesWrapper.exists(actual)) throw failures.failure(info, shouldExist(actual));

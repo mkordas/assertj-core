@@ -55,5 +55,10 @@ public class NioFilesWrapper {
   public boolean isWritable(Path path) {
 	return Files.isWritable(path);
   }
+  
+  public boolean isExecutable(Path path) {
+	return Files.isExecutable(path);
+  }
+  
 }
 
