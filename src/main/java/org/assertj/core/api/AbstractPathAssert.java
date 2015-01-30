@@ -84,14 +84,13 @@ public abstract class AbstractPathAssert<S extends AbstractPathAssert<S>> extend
 	super(actual, selfType);
   }
 
-  // TODO isWritable
   // TODO isExecutable
   // TODO hasFileName
   // TODO containsName ?
 
   /**
-   * Assert that the tested {@link Path} is a readable file, it checks that the file exists and that this Java virtual
-   * machine has appropriate privileges that would allow it open the file for reading.
+   * Assert that the tested {@link Path} is a readable file, it checks that the file exists (according to
+   * {@link Files#exists(Path, LinkOption...)}) and that it is readable(according to {@link Files#isReadable(Path)}).
    *
    * <p>
    * Examples:
@@ -123,7 +122,6 @@ public abstract class AbstractPathAssert<S extends AbstractPathAssert<S>> extend
    * </code></pre>
    *
    * @return self
-   * @throws IOException
    *
    * @see Files#isReadable(Path)
    */
@@ -132,6 +130,48 @@ public abstract class AbstractPathAssert<S extends AbstractPathAssert<S>> extend
 	return myself;
   }
 
+  /**
+   * Assert that the tested {@link Path} is a writable file, it checks that the file exists (according to
+   * {@link Files#exists(Path, LinkOption...)}) and that it is writable(according to {@link Files#isWritable(Path)}).
+   *
+   * <p>
+   * Examples:
+   * </p>
+   *
+   * <pre><code class="java">
+   * // Create a file and set permissions to be writable by all.
+   * Path writableFile = Paths.get("writableFile");
+   * Set&lt;PosixFilePermission&gt; perms = PosixFilePermissions.fromString("rw-rw-rw-");
+   * Files.createFile(writableFile, PosixFilePermissions.asFileAttribute(perms));
+   * 
+   * final Path symlinkToWritableFile = fs.getPath("symlinkToWritableFile");
+   * Files.createSymbolicLink(symlinkToWritableFile, writableFile);
+   * 
+   * // Create a file and set permissions not to be writable.
+   * Path nonWritableFile = Paths.get("nonWritableFile");
+   * Set&lt;PosixFilePermission&gt; perms = PosixFilePermissions.fromString("r--r--r--");
+   * Files.createFile(nonWritableFile, PosixFilePermissions.asFileAttribute(perms));
+   * 
+   * final Path nonExistentPath = fs.getPath("nonexistent");
+   *
+   * // The following assertions succeed:
+   * assertThat(writableFile).isWritable();
+   * assertThat(symlinkToWritableFile).isWritable();
+   *
+   * // The following assertions fail:
+   * assertThat(nonWritableFile).isWritable();
+   * assertThat(nonExistentPath).isWritable();
+   * </code></pre>
+   *
+   * @return self
+   *
+   * @see Files#isWritable(Path)
+   */
+  public S isWritable() {
+	paths.assertIsWritable(info, actual);
+	return myself;
+  }
+  
   /**
    * Assert that the tested {@link Path} exists.
    *

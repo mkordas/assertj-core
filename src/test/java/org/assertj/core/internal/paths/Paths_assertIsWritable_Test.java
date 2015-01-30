@@ -12,6 +12,7 @@
  */
 package org.assertj.core.internal.paths;
 
+import static org.assertj.core.error.ShouldBeWritable.shouldBeWritable;
 import static org.assertj.core.error.ShouldExist.shouldExist;
 import static org.assertj.core.test.TestFailures.wasExpectingAssertionError;
 import static org.assertj.core.util.FailureMessages.actualIsNull;
@@ -20,21 +21,19 @@ import static org.mockito.Mockito.when;
 
 import org.junit.Test;
 
-// TODO : error message should indicate that we follow symbolic links 
-public class Paths_assertExists_Test extends MockPathsBaseTest {
-
+public class Paths_assertIsWritable_Test extends MockPathsBaseTest {
 
   @Test
   public void should_fail_if_actual_is_null() {
 	thrown.expectAssertionError(actualIsNull());
-	paths.assertExists(info, null);
+	paths.assertIsWritable(info, null);
   }
 
   @Test
-  public void should_fail_if_actual_does_not_exist() {
-	when(nioFilesWrapper.exists(actual)).thenReturn(false);
+  public void should_fail_with_should_exist_error_if_actual_does_not_exist() {
 	try {
-	  paths.assertExists(info, actual);
+	  when(nioFilesWrapper.exists(actual)).thenReturn(false);
+	  paths.assertIsWritable(info, actual);
 	  wasExpectingAssertionError();
 	} catch (AssertionError e) {
 	  verify(failures).failure(info, shouldExist(actual));
@@ -42,9 +41,22 @@ public class Paths_assertExists_Test extends MockPathsBaseTest {
   }
 
   @Test
-  public void should_pass_if_actual_exists() {
+  public void should_fail_if_actual_exists_but_is_not_writable() {
+	try {
+	  when(nioFilesWrapper.exists(actual)).thenReturn(true);
+	  when(nioFilesWrapper.isWritable(actual)).thenReturn(false);
+	  paths.assertIsWritable(info, actual);
+	  wasExpectingAssertionError();
+	} catch (AssertionError e) {
+	  verify(failures).failure(info, shouldBeWritable(actual));
+	}
+  }
+
+  @Test
+  public void should_succeed_if_actual_exist_and_is_writable() {
 	when(nioFilesWrapper.exists(actual)).thenReturn(true);
-	paths.assertExists(info, actual);
+	when(nioFilesWrapper.isWritable(actual)).thenReturn(true);
+	paths.assertIsWritable(info, actual);
   }
 
 }

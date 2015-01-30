@@ -17,48 +17,11 @@ import static org.assertj.core.error.ShouldExist.shouldExist;
 import static org.assertj.core.test.TestFailures.wasExpectingAssertionError;
 import static org.assertj.core.util.FailureMessages.actualIsNull;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-import java.io.IOException;
-import java.nio.file.FileSystem;
-import java.nio.file.Files;
-import java.nio.file.Path;
-
-import org.assertj.core.internal.PathsBaseTest;
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
 import org.junit.Test;
 
-public class Paths_assertIsRegularFile_Test extends PathsBaseTest {
-
-  @ClassRule
-  public static FileSystemResource resource = new FileSystemResource();
-
-  private static Path existingFile;
-  private static Path symlinkToExistingFile;
-  private static Path nonExistingPath;
-  private static Path symlinkToNonExistingPath;
-  private static Path existingDirectory;
-  private static Path symlinkToExistingDirectory;
-  
-  @BeforeClass
-  public static void initPaths() throws IOException {
-
-	final FileSystem fs = resource.getFileSystem();
-
-	existingFile = fs.getPath("/existingFile");
-	symlinkToExistingFile = fs.getPath("/symlinkToExistingFile");
-	Files.createFile(existingFile);
-	Files.createSymbolicLink(symlinkToExistingFile, existingFile);
-
-	nonExistingPath = fs.getPath("/nonExistingPath");
-	symlinkToNonExistingPath = fs.getPath("/symlinkToNonExistingPath");
-	Files.createSymbolicLink(symlinkToNonExistingPath, nonExistingPath);
-
-	existingDirectory = fs.getPath("/existingDirectory");
-	symlinkToExistingDirectory = fs.getPath("/symlinkToExistingDirectory");
-	Files.createDirectory(existingDirectory);
-	Files.createSymbolicLink(symlinkToExistingDirectory, existingDirectory);
-  }
+public class Paths_assertIsRegularFile_Test extends MockPathsBaseTest {
 
   @Test
   public void should_fail_if_actual_is_null() {
@@ -68,51 +31,31 @@ public class Paths_assertIsRegularFile_Test extends PathsBaseTest {
 
   @Test
   public void should_fail_with_should_exist_error_if_actual_does_not_exist() {
+	when(nioFilesWrapper.exists(actual)).thenReturn(false);
 	try {
-	  paths.assertIsRegularFile(info, nonExistingPath);
+	  paths.assertIsRegularFile(info, actual);
 	  wasExpectingAssertionError();
 	} catch (AssertionError e) {
-	  verify(failures).failure(info, shouldExist(nonExistingPath));
+	  verify(failures).failure(info, shouldExist(actual));
 	}
   }
 
   @Test
-  public void should_fail_with_should_exist_error_if_actual_is_a_symlink_to_a_non_existing_path() {
+  public void should_fail_if_target_exists_but_is_not_a_regular_file() {
+	when(nioFilesWrapper.exists(actual)).thenReturn(true);
+	when(nioFilesWrapper.isRegularFile(actual)).thenReturn(false);
 	try {
-	  paths.assertIsRegularFile(info, symlinkToNonExistingPath);
+	  paths.assertIsRegularFile(info, actual);
 	  wasExpectingAssertionError();
 	} catch (AssertionError e) {
-	  verify(failures).failure(info, shouldExist(symlinkToNonExistingPath));
+	  verify(failures).failure(info, shouldBeRegularFile(actual));
 	}
-  }
-
-  @Test
-  public void should_fail_if_target_is_an_existing_directory() {
-	try {
-	  paths.assertIsRegularFile(info, existingDirectory);
-	  wasExpectingAssertionError();
-	} catch (AssertionError e) {
-	  verify(failures).failure(info, shouldBeRegularFile(existingDirectory));
-	}
-  }
-
-  @Test
-  public void should_fail_if_target_is_symlink_to_an_existing_directory() {
-	try {
-	  paths.assertIsRegularFile(info, symlinkToExistingDirectory);
-	  wasExpectingAssertionError();
-	} catch (AssertionError e) {
-	  verify(failures).failure(info, shouldBeRegularFile(symlinkToExistingDirectory));
-	}
-  }
-
-  @Test
-  public void should_succeed_if_actual_is_symlink_to_an_existing_regular_file() {
-	paths.assertIsRegularFile(info, symlinkToExistingFile);
   }
 
   @Test
   public void should_succeed_if_actual_is_an_existing_regular_file() {
-	paths.assertIsRegularFile(info, existingFile);
+	when(nioFilesWrapper.exists(actual)).thenReturn(true);
+	when(nioFilesWrapper.isRegularFile(actual)).thenReturn(true);
+	paths.assertIsRegularFile(info, actual);
   }
 }

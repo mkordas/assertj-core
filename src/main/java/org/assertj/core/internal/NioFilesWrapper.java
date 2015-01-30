@@ -36,12 +36,24 @@ public class NioFilesWrapper {
   @VisibleForTesting
   NioFilesWrapper() {}
 
-  public boolean isReadable(Path path) {
-    return Files.isReadable(path);
+  public boolean isRegularFile(Path path) {
+    return Files.isRegularFile(path);
+  }
+  
+  public boolean isDirectory(Path path) {
+	return Files.isDirectory(path);
   }
   
   public boolean exists(Path path) {
 	return Files.exists(path);
+  }
+
+  public boolean isReadable(Path path) {
+	return Files.isReadable(path);
+  }
+  
+  public boolean isWritable(Path path) {
+	return Files.isWritable(path);
   }
 }
 

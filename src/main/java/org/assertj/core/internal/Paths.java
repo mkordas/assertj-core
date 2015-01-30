@@ -25,6 +25,7 @@ import static org.assertj.core.error.ShouldBeReadable.shouldBeReadable;
 import static org.assertj.core.error.ShouldBeRegularFile.shouldBeRegularFile;
 import static org.assertj.core.error.ShouldBeRelativePath.shouldBeRelativePath;
 import static org.assertj.core.error.ShouldBeSymbolicLink.shouldBeSymbolicLink;
+import static org.assertj.core.error.ShouldBeWritable.shouldBeWritable;
 import static org.assertj.core.error.ShouldEndWithPath.shouldEndWith;
 import static org.assertj.core.error.ShouldExist.shouldExist;
 import static org.assertj.core.error.ShouldExistNoFollow.shouldExistNoFollow;
@@ -76,6 +77,12 @@ public class Paths
 	assertExists(info, actual);
 	if (!nioFilesWrapper.isReadable(actual)) throw failures.failure(info, shouldBeReadable(actual));
   }
+  
+  public void assertIsWritable(AssertionInfo info, Path actual) {
+	assertNotNull(info, actual);
+	assertExists(info, actual);
+	if (!nioFilesWrapper.isWritable(actual)) throw failures.failure(info, shouldBeWritable(actual));
+  }
 
   public void assertExists(final AssertionInfo info, final Path actual) {
 	assertNotNull(info, actual);
@@ -95,13 +102,13 @@ public class Paths
 
   public void assertIsRegularFile(final AssertionInfo info, final Path actual) {
 	assertExists(info, actual);
-	if (!isRegularFile(actual)) throw failures.failure(info, shouldBeRegularFile(actual));
+	if (!nioFilesWrapper.isRegularFile(actual)) throw failures.failure(info, shouldBeRegularFile(actual));
   }
 
   public void assertIsDirectory(final AssertionInfo info, final Path actual)
   {
 	assertExists(info, actual);
-	if (!isDirectory(actual)) throw failures.failure(info, shouldBeDirectory(actual));
+	if (!nioFilesWrapper.isDirectory(actual)) throw failures.failure(info, shouldBeDirectory(actual));
   }
 
   public void assertIsSymbolicLink(final AssertionInfo info, final Path actual) {
@@ -241,4 +248,5 @@ public class Paths
   private static void assertNotNull(final AssertionInfo info, final Path actual) {
 	Objects.instance().assertNotNull(info, actual);
   }
+
 }
