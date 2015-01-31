@@ -12,39 +12,38 @@
  */
 package org.assertj.core.internal.paths;
 
-import static org.assertj.core.error.ShouldNotExist.shouldNotExist;
+import static org.assertj.core.error.ShouldBeRelativePath.shouldBeRelativePath;
 import static org.assertj.core.test.TestFailures.wasExpectingAssertionError;
 import static org.assertj.core.util.FailureMessages.actualIsNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.nio.file.LinkOption;
-
 import org.junit.Test;
 
-public class Paths_assertNotExists_Test extends MockPathsBaseTest {
+public class Paths_assertIsRelative_Test extends MockPathsBaseTest {
 
   @Test
   public void should_fail_if_actual_is_null() {
 	thrown.expectAssertionError(actualIsNull());
-	paths.assertDoesNotExist(info, null);
+	paths.assertIsRelative(info, null);
   }
 
   @Test
-  public void should_fail_if_actual_exists() {
-	when(nioFilesWrapper.notExists(actual)).thenReturn(false);
+  public void should_fail_if_actual_is_not_relative() {
+	// This is the default, but make it explicit
+	when(actual.isAbsolute()).thenReturn(true);
+
 	try {
-	  paths.assertDoesNotExist(info, actual);
+	  paths.assertIsRelative(info, actual);
 	  wasExpectingAssertionError();
 	} catch (AssertionError e) {
-	  verify(failures).failure(info, shouldNotExist(actual));
+	  verify(failures).failure(info, shouldBeRelativePath(actual));
 	}
   }
 
   @Test
-  public void should_pass_if_actual_does_not_exists() {
-	when(nioFilesWrapper.notExists(actual, LinkOption.NOFOLLOW_LINKS)).thenReturn(true);
-	paths.assertDoesNotExist(info, actual);
+  public void should_pass_if_actual_is_relative() {
+	when(actual.isAbsolute()).thenReturn(false);
+	paths.assertIsRelative(info, actual);
   }
-
 }

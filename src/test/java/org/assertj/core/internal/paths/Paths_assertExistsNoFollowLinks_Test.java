@@ -12,44 +12,17 @@
  */
 package org.assertj.core.internal.paths;
 
-import static org.assertj.core.error.ShouldExistNoFollow.shouldExistNoFollow;
+import static org.assertj.core.error.ShouldExist.shouldExistNoFollowLinks;
 import static org.assertj.core.test.TestFailures.wasExpectingAssertionError;
 import static org.assertj.core.util.FailureMessages.actualIsNull;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-import java.io.IOException;
-import java.nio.file.FileSystem;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.nio.file.LinkOption;
 
-import org.assertj.core.internal.PathsBaseTest;
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
 import org.junit.Test;
 
-public class Paths_assertExistsNoFollowLinks_Test extends PathsBaseTest {
-
-  @ClassRule
-  public static FileSystemResource resource = new FileSystemResource();
-
-  private static Path existing;
-  private static Path nonExisting;
-  private static Path symlinkToExisting;
-  private static Path symlinkToNonExisting;
-
-  @BeforeClass
-  public static void initPaths() throws IOException {
-	final FileSystem fs = resource.getFileSystem();
-
-	existing = fs.getPath("/existing");
-	Files.createFile(existing);
-	symlinkToExisting = fs.getPath("/symlinkToExisting");
-	Files.createSymbolicLink(symlinkToExisting, existing);
-
-	nonExisting = fs.getPath("/nonExisting");
-	symlinkToNonExisting = fs.getPath("/symlinkToNonExisting");
-	Files.createSymbolicLink(symlinkToNonExisting, nonExisting);
-  }
+public class Paths_assertExistsNoFollowLinks_Test extends MockPathsBaseTest {
 
   @Test
   public void should_fail_if_actual_is_null() {
@@ -59,26 +32,19 @@ public class Paths_assertExistsNoFollowLinks_Test extends PathsBaseTest {
 
   @Test
   public void should_fail_if_actual_does_not_exist() {
+	when(nioFilesWrapper.exists(actual, LinkOption.NOFOLLOW_LINKS)).thenReturn(false);
 	try {
-	  paths.assertExistsNoFollowLinks(info, nonExisting);
+	  paths.assertExistsNoFollowLinks(info, actual);
 	  wasExpectingAssertionError();
 	} catch (AssertionError e) {
-	  verify(failures).failure(info, shouldExistNoFollow(nonExisting));
+	  verify(failures).failure(info, shouldExistNoFollowLinks(actual));
 	}
   }
 
   @Test
-  public void should_pass_if_actual_is_a_symlink_to_a_non_existent_file() {
-	paths.assertExistsNoFollowLinks(info, symlinkToNonExisting);
-  }
-
-  @Test
   public void should_pass_if_actual_exists() {
-	paths.assertExistsNoFollowLinks(info, existing);
+	when(nioFilesWrapper.exists(actual, LinkOption.NOFOLLOW_LINKS)).thenReturn(true);
+	paths.assertExistsNoFollowLinks(info, actual);
   }
 
-  @Test
-  public void should_pass_if_actual_is_a_symlink_to_an_existing_file() {
-	paths.assertExistsNoFollowLinks(info, symlinkToExisting);
-  }
 }

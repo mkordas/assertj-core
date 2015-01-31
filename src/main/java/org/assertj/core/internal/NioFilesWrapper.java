@@ -13,6 +13,7 @@
 package org.assertj.core.internal;
 
 import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.Path;
 
 import org.assertj.core.util.VisibleForTesting;
@@ -40,14 +41,22 @@ public class NioFilesWrapper {
     return Files.isRegularFile(path);
   }
   
+  public boolean isSymbolicLink(Path path) {
+	return Files.isSymbolicLink(path);
+  }
+  
   public boolean isDirectory(Path path) {
 	return Files.isDirectory(path);
   }
   
-  public boolean exists(Path path) {
-	return Files.exists(path);
+  public boolean exists(Path path, LinkOption... options) {
+	return Files.exists(path, options);
   }
 
+  public boolean notExists(Path path, LinkOption... options) {
+	return Files.notExists(path, options);
+  }
+  
   public boolean isReadable(Path path) {
 	return Files.isReadable(path);
   }

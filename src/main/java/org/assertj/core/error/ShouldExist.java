@@ -26,8 +26,8 @@ import java.nio.file.Path;
 public class ShouldExist extends BasicErrorMessageFactory {
 
   @VisibleForTesting
-  public static final String PATH_SHOULD_EXIST = "%nExpecting path:%n  <%s>%nto exist.%n(symbolic links are followed)";
-  public static final String PATH_SHOULD_EXIST_NO_FOLLOW_LINKS = "%nExpecting path:%n  <%s>%nto exist.%n(symbolic links are not followed)";
+  public static final String PATH_SHOULD_EXIST = "%nExpecting path:%n  <%s>%nto exist (symbolic links were followed).";
+  public static final String PATH_SHOULD_EXIST_NO_FOLLOW_LINKS = "%nExpecting path:%n  <%s>%nto exist (symbolic links were not followed).";
   public static final String FILE_SHOULD_EXIST = "%nExpecting file:%n  <%s>%nto exist.";
 
   /**

@@ -12,9 +12,6 @@
  */
 package org.assertj.core.internal;
 
-import static java.nio.file.Files.exists;
-import static java.nio.file.Files.isSymbolicLink;
-import static java.nio.file.Files.notExists;
 import static org.assertj.core.error.ShouldBeAbsolutePath.shouldBeAbsolutePath;
 import static org.assertj.core.error.ShouldBeCanonicalPath.shouldBeCanonicalPath;
 import static org.assertj.core.error.ShouldBeDirectory.shouldBeDirectory;
@@ -27,7 +24,7 @@ import static org.assertj.core.error.ShouldBeSymbolicLink.shouldBeSymbolicLink;
 import static org.assertj.core.error.ShouldBeWritable.shouldBeWritable;
 import static org.assertj.core.error.ShouldEndWithPath.shouldEndWith;
 import static org.assertj.core.error.ShouldExist.shouldExist;
-import static org.assertj.core.error.ShouldExistNoFollow.shouldExistNoFollow;
+import static org.assertj.core.error.ShouldExist.shouldExistNoFollowLinks;
 import static org.assertj.core.error.ShouldHaveNoParent.shouldHaveNoParent;
 import static org.assertj.core.error.ShouldHaveParent.shouldHaveParent;
 import static org.assertj.core.error.ShouldNotExist.shouldNotExist;
@@ -96,13 +93,12 @@ public class Paths
   
   public void assertExistsNoFollowLinks(final AssertionInfo info, final Path actual) {
 	assertNotNull(info, actual);
-	if (!exists(actual, LinkOption.NOFOLLOW_LINKS)) throw failures.failure(info, shouldExistNoFollow(actual));
+	if (!nioFilesWrapper.exists(actual, LinkOption.NOFOLLOW_LINKS)) throw failures.failure(info, shouldExistNoFollowLinks(actual));
   }
 
-  public void assertDoesNotExist(final AssertionInfo info, final Path actual)
-  {
+  public void assertDoesNotExist(final AssertionInfo info, final Path actual) {
 	assertNotNull(info, actual);
-	if (!notExists(actual, LinkOption.NOFOLLOW_LINKS)) throw failures.failure(info, shouldNotExist(actual));
+	if (!nioFilesWrapper.notExists(actual, LinkOption.NOFOLLOW_LINKS)) throw failures.failure(info, shouldNotExist(actual));
   }
 
   public void assertIsRegularFile(final AssertionInfo info, final Path actual) {
@@ -110,15 +106,14 @@ public class Paths
 	if (!nioFilesWrapper.isRegularFile(actual)) throw failures.failure(info, shouldBeRegularFile(actual));
   }
 
-  public void assertIsDirectory(final AssertionInfo info, final Path actual)
-  {
+  public void assertIsDirectory(final AssertionInfo info, final Path actual) {
 	assertExists(info, actual);
 	if (!nioFilesWrapper.isDirectory(actual)) throw failures.failure(info, shouldBeDirectory(actual));
   }
 
   public void assertIsSymbolicLink(final AssertionInfo info, final Path actual) {
 	assertExistsNoFollowLinks(info, actual);
-	if (!isSymbolicLink(actual)) throw failures.failure(info, shouldBeSymbolicLink(actual));
+	if (!nioFilesWrapper.isSymbolicLink(actual)) throw failures.failure(info, shouldBeSymbolicLink(actual));
   }
 
   public void assertIsAbsolute(final AssertionInfo info, final Path actual) {
@@ -169,10 +164,6 @@ public class Paths
 	  throw failures.failure(info, shouldHaveParent(actual, actualParent, expected));
   }
 
-  private static void checkExpectedParentPathIsNotNull(final Path expected) {
-	if (expected == null) throw new NullPointerException("expected parent path should not be null");
-  }
-
   public void assertHasParentRaw(final AssertionInfo info, final Path actual, final Path expected) {
 	assertNotNull(info, actual);
 	checkExpectedParentPathIsNotNull(expected);
@@ -219,14 +210,6 @@ public class Paths
 	if (!canonicalActual.startsWith(canonicalOther)) throw failures.failure(info, shouldStartWith(actual, start));
   }
 
-  private static void assertExpectedStartPathIsNotNull(final Path start) {
-	if (start == null) throw new NullPointerException("the expected start path should not be null");
-  }
-
-  private static void assertExpectedEndPathIsNotNull(final Path end) {
-	if (end == null) throw new NullPointerException("the expected end path should not be null");
-  }
-
   public void assertStartsWithRaw(final AssertionInfo info, final Path actual, final Path other) {
 	assertNotNull(info, actual);
 	assertExpectedStartPathIsNotNull(other);
@@ -252,6 +235,18 @@ public class Paths
 
   private static void assertNotNull(final AssertionInfo info, final Path actual) {
 	Objects.instance().assertNotNull(info, actual);
+  }
+  
+  private static void checkExpectedParentPathIsNotNull(final Path expected) {
+	if (expected == null) throw new NullPointerException("expected parent path should not be null");
+  }
+
+  private static void assertExpectedStartPathIsNotNull(final Path start) {
+	if (start == null) throw new NullPointerException("the expected start path should not be null");
+  }
+
+  private static void assertExpectedEndPathIsNotNull(final Path end) {
+	if (end == null) throw new NullPointerException("the expected end path should not be null");
   }
 
 }

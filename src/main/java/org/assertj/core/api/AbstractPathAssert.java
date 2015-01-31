@@ -169,10 +169,11 @@ public abstract class AbstractPathAssert<S extends AbstractPathAssert<S>> extend
 	paths.assertIsWritable(info, actual);
 	return myself;
   }
-  
+
   /**
    * Assert that the tested {@link Path} is a executable file, it checks that the file exists (according to
-   * {@link Files#exists(Path, LinkOption...)}) and that it is executable(according to {@link Files#isExecutable(Path)}).
+   * {@link Files#exists(Path, LinkOption...)}) and that it is executable(according to {@link Files#isExecutable(Path)}
+   * ).
    *
    * <p>
    * Examples:
@@ -213,7 +214,8 @@ public abstract class AbstractPathAssert<S extends AbstractPathAssert<S>> extend
   }
 
   /**
-   * Assert that the tested {@link Path} exists.
+   * Assert that the tested {@link Path} exists according to {@link Files#exists(Path, LinkOption...)
+   * Files#exists(Path)})
    *
    * <p>
    * <strong>Note that this assertion will follow symbolic links before asserting the path's existence.</strong>
@@ -261,7 +263,8 @@ public abstract class AbstractPathAssert<S extends AbstractPathAssert<S>> extend
   }
 
   /**
-   * Assert that the tested {@link Path} exists, not following symbolic links.
+   * Assert that the tested {@link Path} exists, not following symbolic links, by calling
+   * {@link Files#exists(Path, LinkOption...) Files#exists(Path, LinkOption.NOFOLLOW_LINKS)}).
    *
    * <p>
    * This assertion behaves like {@link #exists()}, with the difference that it can be used to assert the existence of a
