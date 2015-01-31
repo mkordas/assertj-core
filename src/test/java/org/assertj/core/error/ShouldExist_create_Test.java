@@ -14,7 +14,9 @@ package org.assertj.core.error;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.error.ShouldExist.PATH_SHOULD_EXIST;
+import static org.assertj.core.error.ShouldExist.PATH_SHOULD_EXIST_NO_FOLLOW_LINKS;
 import static org.assertj.core.error.ShouldExist.shouldExist;
+import static org.assertj.core.error.ShouldExist.shouldExistNoFollowLinks;
 import static org.mockito.Mockito.mock;
 
 import java.nio.file.Path;
@@ -57,7 +59,7 @@ public class ShouldExist_create_Test {
   }
 
   @Test
-  public void should_create_error_message_for_Path() {
+  public void should_create_error_message_for_Path_following_symbolic_links() {
     final Path actual = mock(Path.class);
 
     factory = shouldExist(actual);
@@ -66,5 +68,17 @@ public class ShouldExist_create_Test {
     expectedMessage = String.format("[Test] " + PATH_SHOULD_EXIST, actual);
 
     assertThat(actualMessage).isEqualTo(expectedMessage);
+  }
+  
+  @Test
+  public void should_create_error_message_for_Path_not_following_symbolic_links() {
+	final Path actual = mock(Path.class);
+	
+	factory = shouldExistNoFollowLinks(actual);
+	actualMessage = factory.create(description, representation);
+	
+	expectedMessage = String.format("[Test] " + PATH_SHOULD_EXIST_NO_FOLLOW_LINKS, actual);
+	
+	assertThat(actualMessage).isEqualTo(expectedMessage);
   }
 }

@@ -20,7 +20,6 @@ import static org.mockito.Mockito.when;
 
 import org.junit.Test;
 
-// TODO : error message should indicate that we follow symbolic links 
 public class Paths_assertExists_Test extends MockPathsBaseTest {
 
 
