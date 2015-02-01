@@ -25,6 +25,7 @@ import static org.assertj.core.error.ShouldBeWritable.shouldBeWritable;
 import static org.assertj.core.error.ShouldEndWithPath.shouldEndWith;
 import static org.assertj.core.error.ShouldExist.shouldExist;
 import static org.assertj.core.error.ShouldExist.shouldExistNoFollowLinks;
+import static org.assertj.core.error.ShouldHaveName.shouldHaveName;
 import static org.assertj.core.error.ShouldHaveNoParent.shouldHaveNoParent;
 import static org.assertj.core.error.ShouldHaveParent.shouldHaveParent;
 import static org.assertj.core.error.ShouldNotExist.shouldNotExist;
@@ -231,6 +232,12 @@ public class Paths
 	assertNotNull(info, actual);
 	assertExpectedEndPathIsNotNull(end);
 	if (!actual.endsWith(end)) throw failures.failure(info, shouldEndWith(actual, end));
+  }
+
+  public void assertHasFileName(final AssertionInfo info, Path actual, String fileName) {
+	assertNotNull(info, actual);
+	if (fileName == null) throw new NullPointerException("expected fileName should not be null");
+	if (!actual.getFileName().endsWith(fileName)) throw failures.failure(info, shouldHaveName(actual, fileName));
   }
 
   private static void assertNotNull(final AssertionInfo info, final Path actual) {

@@ -82,7 +82,6 @@ public abstract class AbstractPathAssert<S extends AbstractPathAssert<S>> extend
 	super(actual, selfType);
   }
 
-  // TODO hasFileName
   // TODO containsName ?
   // TODO hasContent
 
@@ -678,6 +677,48 @@ public abstract class AbstractPathAssert<S extends AbstractPathAssert<S>> extend
   }
 
   /**
+   * Assert that the tested {@link Path} last element String representation is equal to the given filename.
+   *
+   * <p>
+   * Note that the path does not need to exist to check its file name.
+   * </p>
+   * <p>
+   * Examples:
+   * </p>
+   *
+   * <pre><code class="java">
+   * // fs is a Unix filesystem
+   * final Path file = fs.getPath("/foo/foo.txt");
+   * final Path symlink = fs.getPath("/home/symlink-to-foo");
+   * Files.createSymbolicLink(symlink, file);
+   *
+   * // the following assertions succeed:
+   * assertThat(fs.getPath("/dir1/file.txt")).hasFileName("file.txt");
+   * assertThat(fs.getPath("/dir1/dir2")).hasFileName("dir2");
+   * // you can check file name on non existent paths
+   * assertThat(file).hasFileName("foo.txt");
+   * assertThat(symlink).hasFileName("symlink-to-foo");
+   *
+   * // the following assertions fail:
+   * assertThat(fs.getPath("/dir1/file.txt").hasFileName("other.txt");
+   * // fail because, last element is "." 
+   * assertThat(fs.getPath("/dir1/.")).hasFileName("dir1");
+   * // fail because a link filename is not the same as its target filename
+   * assertThat(symlink).hasFileName("file.txt");
+   * </code></pre>
+   *
+   * @param fileName the expected filename
+   * @return self
+   *
+   * @throws NullPointerException if the given fileName is null.
+   * @see Path#getFileName()
+   */
+  public S hasFileName(final String fileName) {
+	paths.assertHasFileName(info, actual, fileName);
+	return myself;
+  }
+
+  /**
    * Assert that the tested {@link Path} has the expected parent path.
    *
    * <p>
@@ -710,6 +751,9 @@ public abstract class AbstractPathAssert<S extends AbstractPathAssert<S>> extend
    * @param expected the expected parent path
    * @return self
    *
+   * @throws NullPointerException if the given parent path is null.
+   * @throws PathsException failed to canonicalize the tested path or the path given as an argument
+   * 
    * @see Path#getParent()
    */
   public S hasParent(final Path expected) {
@@ -762,6 +806,8 @@ public abstract class AbstractPathAssert<S extends AbstractPathAssert<S>> extend
    * @param expected the expected parent path
    * @return self
    *
+   * @throws NullPointerException if the given parent path is null.
+   * 
    * @see Path#getParent()
    */
   public S hasParentRaw(final Path expected) {
@@ -890,6 +936,7 @@ public abstract class AbstractPathAssert<S extends AbstractPathAssert<S>> extend
    * @param other the other path
    * @return self
    *
+   * @throws NullPointerException if the given path is null.
    * @throws PathsException failed to canonicalize the tested path or the path given as an argument
    *
    * @see Path#startsWith(Path)
@@ -942,6 +989,8 @@ public abstract class AbstractPathAssert<S extends AbstractPathAssert<S>> extend
    * @param other the other path
    * @return self
    *
+   * @throws NullPointerException if the given path is null.
+   * 
    * @see Path#startsWith(Path)
    */
   public S startsWithRaw(final Path other) {
@@ -984,6 +1033,7 @@ public abstract class AbstractPathAssert<S extends AbstractPathAssert<S>> extend
    * @param other the other path
    * @return self
    *
+   * @throws NullPointerException if the given path is null.
    * @throws PathsException failed to canonicalize the tested path (see class
    *           description)
    * 
@@ -1031,6 +1081,8 @@ public abstract class AbstractPathAssert<S extends AbstractPathAssert<S>> extend
    *
    * @param other the other path
    * @return self
+   * 
+   * @throws NullPointerException if the given path is null.
    * 
    * @see Path#endsWith(Path)
    */
