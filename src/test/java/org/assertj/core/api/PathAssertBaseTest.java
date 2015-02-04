@@ -12,20 +12,22 @@
  */
 package org.assertj.core.api;
 
-import org.assertj.core.internal.Paths;
+import static org.mockito.Mockito.mock;
 
+import java.nio.charset.Charset;
 import java.nio.file.Path;
 
-import static org.mockito.Mockito.mock;
+import org.assertj.core.internal.Paths;
 
 
 /**
  * Base class for {@link PathAssert} tests.
  */
-public abstract class PathAssertBaseTest
-    extends BaseTestTemplate<PathAssert, Path>
-{
+public abstract class PathAssertBaseTest extends BaseTestTemplate<PathAssert, Path> {
+  
   protected Paths paths;
+  protected Charset defaultCharset;
+  protected Charset otherCharset;
 
   @Override
   protected PathAssert create_assertions() {
@@ -37,6 +39,14 @@ public abstract class PathAssertBaseTest
     super.inject_internal_objects();
     paths = mock(Paths.class);
     assertions.paths = paths;
+    defaultCharset = Charset.defaultCharset();
+    for (Charset charset : Charset.availableCharsets().values()) {
+      if (!charset.equals(defaultCharset)) otherCharset = charset;
+    }
+  }
+
+  protected Charset getCharset(PathAssert someAssertions) {
+    return someAssertions.charset;
   }
 
   protected Paths getPaths(PathAssert someAssertions) {

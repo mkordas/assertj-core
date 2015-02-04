@@ -58,7 +58,7 @@ import com.github.marschall.memoryfilesystem.MemoryFileSystemBuilder;
  * @see Files
  */
 public abstract class PathsBaseTest {
-  
+
   @Rule
   public ExpectedException thrown = none();
   protected Failures failures;
@@ -66,9 +66,8 @@ public abstract class PathsBaseTest {
   protected NioFilesWrapper nioFilesWrapper;
   protected AssertionInfo info;
 
-  // TODO! uncomment when needed
-  // protected Diff diff;
-  // protected BinaryDiff binaryDiff;
+  protected Diff diff;
+  protected BinaryDiff binaryDiff;
 
   @Before
   public void setUp() throws IOException {
@@ -77,10 +76,10 @@ public abstract class PathsBaseTest {
 	paths = new Paths(nioFilesWrapper);
 	paths.failures = failures;
 	info = someInfo();
-	// diff = mock(Diff.class);
-	// files.diff = diff;
-	// binaryDiff = mock(BinaryDiff.class);
-	// files.binaryDiff = binaryDiff;
+	diff = mock(Diff.class);
+	paths.diff = diff;
+	binaryDiff = mock(BinaryDiff.class);
+	paths.binaryDiff = binaryDiff;
   }
 
   /**
@@ -92,15 +91,15 @@ public abstract class PathsBaseTest {
    * </p>
    */
   public static class FileSystemResource extends ExternalResource {
-	
+
 	private final FileSystem fs;
 
 	public FileSystemResource() {
 	  try {
-	    fs = MemoryFileSystemBuilder.newLinux().build("PathsTest");
-      } catch (IOException e) {
-    	throw new RuntimeException("failed to initialize filesystem", e);
-      }
+		fs = MemoryFileSystemBuilder.newLinux().build("PathsTest");
+	  } catch (IOException e) {
+		throw new RuntimeException("failed to initialize filesystem", e);
+	  }
 	}
 
 	public FileSystem getFileSystem() {

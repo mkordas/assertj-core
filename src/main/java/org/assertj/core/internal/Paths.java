@@ -12,6 +12,7 @@
  */
 package org.assertj.core.internal;
 
+import static java.lang.String.format;
 import static org.assertj.core.error.ShouldBeAbsolutePath.shouldBeAbsolutePath;
 import static org.assertj.core.error.ShouldBeCanonicalPath.shouldBeCanonicalPath;
 import static org.assertj.core.error.ShouldBeDirectory.shouldBeDirectory;
@@ -25,25 +26,31 @@ import static org.assertj.core.error.ShouldBeWritable.shouldBeWritable;
 import static org.assertj.core.error.ShouldEndWithPath.shouldEndWith;
 import static org.assertj.core.error.ShouldExist.shouldExist;
 import static org.assertj.core.error.ShouldExist.shouldExistNoFollowLinks;
+import static org.assertj.core.error.ShouldHaveBinaryContent.shouldHaveBinaryContent;
+import static org.assertj.core.error.ShouldHaveContent.shouldHaveContent;
 import static org.assertj.core.error.ShouldHaveName.shouldHaveName;
 import static org.assertj.core.error.ShouldHaveNoParent.shouldHaveNoParent;
 import static org.assertj.core.error.ShouldHaveParent.shouldHaveParent;
 import static org.assertj.core.error.ShouldNotExist.shouldNotExist;
 import static org.assertj.core.error.ShouldStartWithPath.shouldStartWith;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
+import java.util.List;
 
 import org.assertj.core.api.AssertionInfo;
+import org.assertj.core.util.FilesException;
 import org.assertj.core.util.PathsException;
 import org.assertj.core.util.VisibleForTesting;
 
 /**
  * Core assertion class for {@link Path} assertions
  */
-public class Paths
-{
+public class Paths {
+  
   private static final String FAILED_TO_RESOLVE_ARGUMENT_REAL_PATH = "failed to resolve argument real path";
   private static final String FAILED_TO_RESOLVE_ACTUAL_REAL_PATH = "failed to resolve actual real path";
   @VisibleForTesting
@@ -52,6 +59,10 @@ public class Paths
   private static final Paths INSTANCE = new Paths();
 
   @VisibleForTesting
+  Diff diff = new Diff();
+  @VisibleForTesting
+  BinaryDiff binaryDiff = new BinaryDiff();
+  @VisibleForTesting
   Failures failures = Failures.instance();
 
   private NioFilesWrapper nioFilesWrapper;
@@ -59,12 +70,12 @@ public class Paths
   public static Paths instance() {
 	return INSTANCE;
   }
-  
+
   @VisibleForTesting
   Paths(NioFilesWrapper nioFilesWrapper) {
 	this.nioFilesWrapper = nioFilesWrapper;
   }
-  
+
   private Paths() {
 	this(NioFilesWrapper.instance());
   }
@@ -74,7 +85,7 @@ public class Paths
 	assertExists(info, actual);
 	if (!nioFilesWrapper.isReadable(actual)) throw failures.failure(info, shouldBeReadable(actual));
   }
-  
+
   public void assertIsWritable(AssertionInfo info, Path actual) {
 	assertNotNull(info, actual);
 	assertExists(info, actual);
@@ -86,20 +97,22 @@ public class Paths
 	assertExists(info, actual);
 	if (!nioFilesWrapper.isExecutable(actual)) throw failures.failure(info, shouldBeExecutable(actual));
   }
-  
+
   public void assertExists(final AssertionInfo info, final Path actual) {
 	assertNotNull(info, actual);
 	if (!nioFilesWrapper.exists(actual)) throw failures.failure(info, shouldExist(actual));
   }
-  
+
   public void assertExistsNoFollowLinks(final AssertionInfo info, final Path actual) {
 	assertNotNull(info, actual);
-	if (!nioFilesWrapper.exists(actual, LinkOption.NOFOLLOW_LINKS)) throw failures.failure(info, shouldExistNoFollowLinks(actual));
+	if (!nioFilesWrapper.exists(actual, LinkOption.NOFOLLOW_LINKS))
+	  throw failures.failure(info, shouldExistNoFollowLinks(actual));
   }
 
   public void assertDoesNotExist(final AssertionInfo info, final Path actual) {
 	assertNotNull(info, actual);
-	if (!nioFilesWrapper.notExists(actual, LinkOption.NOFOLLOW_LINKS)) throw failures.failure(info, shouldNotExist(actual));
+	if (!nioFilesWrapper.notExists(actual, LinkOption.NOFOLLOW_LINKS))
+	  throw failures.failure(info, shouldNotExist(actual));
   }
 
   public void assertIsRegularFile(final AssertionInfo info, final Path actual) {
@@ -126,7 +139,7 @@ public class Paths
 	assertNotNull(info, actual);
 	if (actual.isAbsolute()) throw failures.failure(info, shouldBeRelativePath(actual));
   }
-  
+
   public void assertIsNormalized(final AssertionInfo info, final Path actual) {
 	assertNotNull(info, actual);
 	if (!actual.normalize().equals(actual)) throw failures.failure(info, shouldBeNormalized(actual));
@@ -207,7 +220,7 @@ public class Paths
 	} catch (IOException e) {
 	  throw new PathsException(FAILED_TO_RESOLVE_ARGUMENT_REAL_PATH, e);
 	}
- 
+
 	if (!canonicalActual.startsWith(canonicalOther)) throw failures.failure(info, shouldStartWith(actual, start));
   }
 
@@ -243,7 +256,7 @@ public class Paths
   private static void assertNotNull(final AssertionInfo info, final Path actual) {
 	Objects.instance().assertNotNull(info, actual);
   }
-  
+
   private static void checkExpectedParentPathIsNotNull(final Path expected) {
 	if (expected == null) throw new NullPointerException("expected parent path should not be null");
   }
@@ -254,6 +267,32 @@ public class Paths
 
   private static void assertExpectedEndPathIsNotNull(final Path end) {
 	if (end == null) throw new NullPointerException("the expected end path should not be null");
+  }
+
+  public void assertHasContent(final AssertionInfo info, Path actual, String expected, Charset charset) {
+	if (expected == null) throw new NullPointerException("The text to compare to should not be null");
+	assertIsReadable(info, actual);
+	try {
+	  File actualAsFile = actual.toFile();
+	  List<String> diffs = diff.diff(actualAsFile, expected, charset);
+	  if (diffs.isEmpty()) return;
+	  throw failures.failure(info, shouldHaveContent(actualAsFile, charset, diffs));
+	} catch (IOException e) {
+	  throw new FilesException(format("Unable to verify text contents of file:<%s>", actual), e);
+	}
+  }
+
+  public void assertHasBinaryContent(AssertionInfo info, Path actual, byte[] expected) {
+    if (expected == null) throw new NullPointerException("The binary content to compare to should not be null");
+    assertIsReadable(info, actual);
+    File actualFile = actual.toFile();
+    try {
+	  BinaryDiffResult diffResult = binaryDiff.diff(actualFile, expected);
+      if (diffResult.hasNoDiff()) return;
+      throw failures.failure(info, shouldHaveBinaryContent(actualFile, diffResult));
+    } catch (IOException e) {
+      throw new FilesException(format("Unable to verify binary contents of file:<%s>", actualFile), e);
+    }
   }
 
 }

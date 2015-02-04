@@ -12,6 +12,9 @@
  */
 package org.assertj.core.api;
 
+import static java.lang.String.format;
+
+import java.nio.charset.Charset;
 import java.nio.file.ClosedFileSystemException;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
@@ -22,6 +25,7 @@ import java.nio.file.ProviderMismatchException;
 import java.nio.file.spi.FileSystemProvider;
 
 import org.assertj.core.internal.Paths;
+import org.assertj.core.util.FilesException;
 import org.assertj.core.util.PathsException;
 import org.assertj.core.util.VisibleForTesting;
 
@@ -78,12 +82,164 @@ public abstract class AbstractPathAssert<S extends AbstractPathAssert<S>> extend
   @VisibleForTesting
   protected Paths paths = Paths.instance();
 
+  @VisibleForTesting
+  Charset charset = Charset.defaultCharset();
+
   protected AbstractPathAssert(final Path actual, final Class<?> selfType) {
 	super(actual, selfType);
   }
 
-  // TODO containsName ?
-  // TODO hasContent
+  /**
+   * Verifies that the content of the actual {@code File} is equal to the content of the given one.
+   * 
+   * @param expected the given {@code File} to compare the actual {@code File} to.
+   * @return {@code this} assertion object.
+   * @throws NullPointerException if the given {@code File} is {@code null}.
+   * @throws IllegalArgumentException if the given {@code File} is not an existing file.
+   * @throws AssertionError if the actual {@code File} is {@code null}.
+   * @throws AssertionError if the actual {@code File} is not an existing file.
+   * @throws FilesException if an I/O error occurs.
+   * @throws AssertionError if the content of the actual {@code File} is not equal to the content of the given one.
+   */
+  public S hasSameContentAs(Path expected) {
+	// TODO
+	// paths.assertEqualContent(info, actual, expected);
+	return myself;
+  }
+
+  /**
+   * Verifies that the binary content of the actual {@code Path} is <b>exactly</b> equal to the given one.
+   *
+   * <p>
+   * Examples:
+   * </p>
+   *
+   * <pre><code class="java">
+   * // using the default charset, the following assertion succeeds:
+   * Path xFile = Files.write(Paths.get("xfile.txt"), "The Truth Is Out There".getBytes());
+   * assertThat(xFile).hasBinaryContent("The Truth Is Out There".getBytes());
+   *
+   * // using a specific charset 
+   * Charset turkishCharset = Charset.forName("windows-1254");
+   * Path xFileTurkish = Files.write(Paths.get("xfile.turk"), Collections.singleton("Gerçek Başka bir yerde mi"), turkishCharset);
+   * 
+   * // The following assertion succeeds:
+   * byte[] binaryContent = "Gerçek Başka bir yerde mi".getBytes(turkishCharset.name());
+   * assertThat(xFileTurkish).hasBinaryContent(binaryContent);
+   * 
+   * // The following assertion fails ... unless you are in Turkey ;-):
+   * assertThat(xFileTurkish).hasBinaryContent("Gerçek Başka bir yerde mi".getBytes());
+   * </code></pre>
+   * 
+   * @param expected the expected binary content to compare the actual {@code File}'s content to.
+   * @return {@code this} assertion object.
+   * @throws NullPointerException if the given content is {@code null}.
+   * @throws AssertionError if the actual {@code File} is {@code null}.
+   * @throws AssertionError if the actual {@code File} is not an existing file.
+   * @throws FilesException if an I/O error occurs.
+   * @throws AssertionError if the content of the actual {@code File} is not equal to the given binary content.
+   */
+  public S hasBinaryContent(byte[] expected) {
+	paths.assertHasBinaryContent(info, actual, expected);
+	return myself;
+  }
+
+  /**
+   * Specifies the name of the charset to use for text-based assertions on the path's contents (path must be a readable
+   * file).
+   * 
+   * <p>
+   * Examples:
+   * </p>
+   * 
+   * <pre><code class="java">
+   * Charset turkishCharset = Charset.forName("windows-1254");
+   * Path xFileTurkish = Files.write(Paths.get("xfile.turk"), Collections.singleton("Gerçek Başka bir yerde mi"), turkishCharset);
+   * 
+   * // The following assertion succeeds:
+   * assertThat(xFileTurkish).usingCharset("windows-1254").hasContent("Gerçek Başka bir yerde mi");
+   * </code></pre>
+   * 
+   * @param charsetName the name of the charset to use.
+   * @return {@code this} assertion object.
+   * @throws IllegalArgumentException if the given encoding is not supported on this platform.
+   */
+  public S usingCharset(String charsetName) {
+	if (!Charset.isSupported(charsetName))
+	  throw new IllegalArgumentException(format("Charset:<'%s'> is not supported on this system", charsetName));
+	return usingCharset(Charset.forName(charsetName));
+  }
+
+  /**
+   * Specifies the charset to use for text-based assertions on the path's contents (path must be a readable file).
+   * 
+   * <p>
+   * Examples:
+   * </p>
+   * 
+   * <pre><code class="java">
+   * Charset turkishCharset = Charset.forName("windows-1254");
+   * Path xFileTurkish = Files.write(Paths.get("xfile.turk"), Collections.singleton("Gerçek Başka bir yerde mi"), turkishCharset);
+   * 
+   * // The following assertion succeeds:
+   * assertThat(xFileTurkish).usingCharset(turkishCharset).hasContent("Gerçek Başka bir yerde mi");
+   * </code></pre>
+   * 
+   * @param charset the charset to use.
+   * @return {@code this} assertion object.
+   * @throws NullPointerException if the given charset is {@code null}.
+   */
+  public S usingCharset(Charset charset) {
+	if (charset == null) throw new NullPointerException("The charset should not be null");
+	this.charset = charset;
+	return myself;
+  }
+
+  /**
+   * Verifies that the text content of the actual {@code Path} (which must be a readable file) is <b>exactly</b> equal
+   * to the given one.<br/>
+   * The charset to use when reading the file should be provided with {@link #usingCharset(Charset)} or
+   * {@link #usingCharset(String)} prior to calling this method; if not, the platform's default charset (as returned by
+   * {@link Charset#defaultCharset()}) will be used.
+   * 
+   * <p>
+   * Examples:
+   * </p>
+   *
+   * <pre><code class="java">
+   * // use the default charset 
+   * Path xFile = Files.write(Paths.get("xfile.txt"), "The Truth Is Out There".getBytes());
+   * 
+   * // The following assertion succeeds (default charset is used):
+   * assertThat(xFile).hasContent("The Truth Is Out There");
+   * 
+   * // The following assertion fails:
+   * assertThat(xFile).hasContent("La Vérité Est Ailleurs");
+   * 
+   * // using a specific charset 
+   * Charset turkishCharset = Charset.forName("windows-1254");
+   * 
+   * Path xFileTurkish = Files.write(Paths.get("xfile.turk"), Collections.singleton("Gerçek Başka bir yerde mi"), turkishCharset);
+   * 
+   * // The following assertion succeeds:
+   * assertThat(xFileTurkish).usingCharset(turkishCharset).hasContent("Gerçek Başka bir yerde mi");
+   * 
+   * // The following assertion fails ... unless you are in Turkey ;-):
+   * assertThat(xFileTurkish).hasContent("Gerçek Başka bir yerde mi");
+   * </code></pre>
+   *
+   * @param expected the expected text content to compare the actual {@code File}'s content to.
+   * @return {@code this} assertion object.
+   * @throws NullPointerException if the given content is {@code null}.
+   * @throws FilesException if an I/O error occurs.
+   * @throws AssertionError if the actual {@code Path} is {@code null}.
+   * @throws AssertionError if the actual {@code Path} is not a {@link Files#isReadable(Path) readable} file.
+   * @throws AssertionError if the content of the actual {@code File} is not equal to the given content.
+   */
+  public S hasContent(String expected) {
+	paths.assertHasContent(info, actual, expected, charset);
+	return myself;
+  }
 
   /**
    * Assert that the tested {@link Path} is a readable file, it checks that the file exists (according to
