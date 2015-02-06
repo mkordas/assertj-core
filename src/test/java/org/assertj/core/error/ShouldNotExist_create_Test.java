@@ -13,8 +13,8 @@
 package org.assertj.core.error;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.error.ShouldNotExist.FILE_SHOULDNOTEXIST;
-import static org.assertj.core.error.ShouldNotExist.PATH_SHOULDNOTEXIST;
+import static org.assertj.core.error.ShouldNotExist.FILE_SHOULD_NOT_EXIST;
+import static org.assertj.core.error.ShouldNotExist.PATH_SHOULD_NOT_EXIST;
 import static org.assertj.core.error.ShouldNotExist.shouldNotExist;
 import static org.mockito.Mockito.mock;
 
@@ -54,7 +54,7 @@ public class ShouldNotExist_create_Test {
 	factory = shouldNotExist(file);
 	actualMessage = factory.create(description, representation);
 
-	expectedMessage = String.format("[Test] " + FILE_SHOULDNOTEXIST, file);
+	expectedMessage = String.format("[Test] " + FILE_SHOULD_NOT_EXIST, file);
 
 	assertThat(actualMessage).isEqualTo(expectedMessage);
   }
@@ -66,7 +66,7 @@ public class ShouldNotExist_create_Test {
 	factory = shouldNotExist(path);
 	actualMessage = factory.create(description, representation);
 
-	expectedMessage = String.format("[Test] " + PATH_SHOULDNOTEXIST, path);
+	expectedMessage = String.format("[Test] " + PATH_SHOULD_NOT_EXIST, path);
 
 	assertThat(actualMessage).isEqualTo(expectedMessage);
   }

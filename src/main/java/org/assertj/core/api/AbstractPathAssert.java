@@ -90,20 +90,36 @@ public abstract class AbstractPathAssert<S extends AbstractPathAssert<S>> extend
   }
 
   /**
-   * Verifies that the content of the actual {@code File} is equal to the content of the given one.
+   * Verifies that the content of the actual {@code Path} is the same as the given one (both paths must be a readable
+   * files). The default charset is used to read each files.
    * 
-   * @param expected the given {@code File} to compare the actual {@code File} to.
+   * <p>
+   * Examples:
+   * </p>
+   *
+   * <pre><code class="java">
+   * // use the default charset 
+   * Path xFile = Files.write(Paths.get("xfile.txt"), "The Truth Is Out There".getBytes());
+   * Path xFileClone = Files.write(Paths.get("xfile-clone.txt"), "The Truth Is Out There".getBytes());
+   * Path xFileFrench = Files.write(Paths.get("xfile-french.txt"), "La Vérité Est Ailleurs".getBytes());
+   * 
+   * // The following assertion succeeds (default charset is used):
+   * assertThat(xFile).hasSameContentAs(xFileClone);
+   * 
+   * // The following assertion fails:
+   * assertThat(xFile).hasSameContentAs(xFileFrench);
+   * </code></pre>
+   * 
+   * @param expected the given {@code Path} to compare the actual {@code Path} to.
    * @return {@code this} assertion object.
-   * @throws NullPointerException if the given {@code File} is {@code null}.
-   * @throws IllegalArgumentException if the given {@code File} is not an existing file.
-   * @throws AssertionError if the actual {@code File} is {@code null}.
-   * @throws AssertionError if the actual {@code File} is not an existing file.
-   * @throws FilesException if an I/O error occurs.
-   * @throws AssertionError if the content of the actual {@code File} is not equal to the content of the given one.
+   * @throws NullPointerException if the given {@code Path} is {@code null}.
+   * @throws AssertionError if the actual or given {@code Path} is not an existing readable file.
+   * @throws AssertionError if the actual {@code Path} is {@code null}.
+   * @throws AssertionError if the content of the actual {@code Path} is not equal to the content of the given one.
+   * @throws PathsException if an I/O error occurs.
    */
   public S hasSameContentAs(Path expected) {
-	// TODO
-	// paths.assertEqualContent(info, actual, expected);
+	paths.assertHasSameContentAs(info, actual, expected);
 	return myself;
   }
 
@@ -124,7 +140,8 @@ public abstract class AbstractPathAssert<S extends AbstractPathAssert<S>> extend
    * Path xFileTurkish = Files.write(Paths.get("xfile.turk"), Collections.singleton("Gerçek Başka bir yerde mi"), turkishCharset);
    * 
    * // The following assertion succeeds:
-   * byte[] binaryContent = "Gerçek Başka bir yerde mi".getBytes(turkishCharset.name());
+   * String expectedContent = "Gerçek Başka bir yerde mi" + System.lineSeparator();
+   * byte[] binaryContent = expectedContent.getBytes(turkishCharset.name());
    * assertThat(xFileTurkish).hasBinaryContent(binaryContent);
    * 
    * // The following assertion fails ... unless you are in Turkey ;-):
@@ -255,15 +272,15 @@ public abstract class AbstractPathAssert<S extends AbstractPathAssert<S>> extend
    * Set&lt;PosixFilePermission&gt; perms = PosixFilePermissions.fromString("r--r--r--");
    * Files.createFile(readableFile, PosixFilePermissions.asFileAttribute(perms));
    * 
-   * final Path symlinkToReadableFile = fs.getPath("symlinkToReadableFile");
+   * final Path symlinkToReadableFile = FileSystems.getDefault().getPath("symlinkToReadableFile");
    * Files.createSymbolicLink(symlinkToReadableFile, readableFile);
    * 
    * // Create a file and set permissions not to be readable.
    * Path nonReadableFile = Paths.get("nonReadableFile");
-   * Set&lt;PosixFilePermission&gt; perms = PosixFilePermissions.fromString("-wx------");
-   * Files.createFile(nonReadableFile, PosixFilePermissions.asFileAttribute(perms));
+   * Set&lt;PosixFilePermission&gt; notReadablePerms = PosixFilePermissions.fromString("-wx------");
+   * Files.createFile(nonReadableFile, PosixFilePermissions.asFileAttribute(notReadablePerms));
    * 
-   * final Path nonExistentPath = fs.getPath("nonexistent");
+   * final Path nonExistentPath = FileSystems.getDefault().getPath("nonexistent");
    *
    * // The following assertions succeed:
    * assertThat(readableFile).isReadable();
@@ -297,15 +314,15 @@ public abstract class AbstractPathAssert<S extends AbstractPathAssert<S>> extend
    * Set&lt;PosixFilePermission&gt; perms = PosixFilePermissions.fromString("rw-rw-rw-");
    * Files.createFile(writableFile, PosixFilePermissions.asFileAttribute(perms));
    * 
-   * final Path symlinkToWritableFile = fs.getPath("symlinkToWritableFile");
+   * final Path symlinkToWritableFile = FileSystems.getDefault().getPath("symlinkToWritableFile");
    * Files.createSymbolicLink(symlinkToWritableFile, writableFile);
    * 
    * // Create a file and set permissions not to be writable.
    * Path nonWritableFile = Paths.get("nonWritableFile");
-   * Set&lt;PosixFilePermission&gt; perms = PosixFilePermissions.fromString("r--r--r--");
+   * perms = PosixFilePermissions.fromString("r--r--r--");
    * Files.createFile(nonWritableFile, PosixFilePermissions.asFileAttribute(perms));
    * 
-   * final Path nonExistentPath = fs.getPath("nonexistent");
+   * final Path nonExistentPath = FileSystems.getDefault().getPath("nonexistent");
    *
    * // The following assertions succeed:
    * assertThat(writableFile).isWritable();
@@ -340,15 +357,15 @@ public abstract class AbstractPathAssert<S extends AbstractPathAssert<S>> extend
    * Set&lt;PosixFilePermission&gt; perms = PosixFilePermissions.fromString("r-xr-xr-x");
    * Files.createFile(executableFile, PosixFilePermissions.asFileAttribute(perms));
    * 
-   * final Path symlinkToExecutableFile = fs.getPath("symlinkToExecutableFile");
+   * final Path symlinkToExecutableFile = FileSystems.getDefault().getPath("symlinkToExecutableFile");
    * Files.createSymbolicLink(symlinkToExecutableFile, executableFile);
    * 
    * // Create a file and set permissions not to be executable.
    * Path nonExecutableFile = Paths.get("nonExecutableFile");
-   * Set&lt;PosixFilePermission&gt; perms = PosixFilePermissions.fromString("rw-------");
+   * perms = PosixFilePermissions.fromString("rw-------");
    * Files.createFile(nonExecutableFile, PosixFilePermissions.asFileAttribute(perms));
    * 
-   * final Path nonExistentPath = fs.getPath("nonexistent");
+   * final Path nonExistentPath = FileSystems.getDefault().getPath("nonexistent");
    *
    * // The following assertions succeed:
    * assertThat(executableFile).isExecutable();
@@ -470,8 +487,8 @@ public abstract class AbstractPathAssert<S extends AbstractPathAssert<S>> extend
    * </p>
    *
    * <p>
-   * This means that even if the path to test is a symbolic link whose target does not exist, this assertion will
-   * consider that the path exists (note that this is unlike the default behavior of {@link #exists()}).
+   * This means that even if the link exists this assertion will fail even if the link's target does not exists - note
+   * that this is unlike the default behavior of {@link #exists()}.
    * </p>
    *
    * <p>
@@ -498,6 +515,7 @@ public abstract class AbstractPathAssert<S extends AbstractPathAssert<S>> extend
    * // The following assertions fail:
    * assertThat(existingFile).doesNotExist();
    * assertThat(symlinkToExistingFile).doesNotExist();
+   * // fail because symlinkToNonExistentPath exists even though its target does not.
    * assertThat(symlinkToNonExistentPath).doesNotExist();
    * </code></pre>
    *
@@ -676,7 +694,7 @@ public abstract class AbstractPathAssert<S extends AbstractPathAssert<S>> extend
   }
 
   /**
-   * Assert that the tested {@link Path} is absolute.
+   * Assert that the tested {@link Path} is absolute (the path does not have to exist).
    *
    * <p>
    * Note that the fact that a path is absolute does not mean that it is {@link Path#normalize() normalized}:
@@ -792,8 +810,8 @@ public abstract class AbstractPathAssert<S extends AbstractPathAssert<S>> extend
    * path}.
    *
    * <p>
-   * For Windows users, this assertion is no different than {@link #isAbsolute()}. For Unix users, this assertion
-   * ensures that the tested path is the actual file system resource, that is, it is not a
+   * For Windows users, this assertion is no different than {@link #isAbsolute()} expect that the file must exist. For
+   * Unix users, this assertion ensures that the tested path is the actual file system resource, that is, it is not a
    * {@link Files#isSymbolicLink(Path) symbolic link} to the actual resource, even if the path is absolute.
    * </p>
    *
@@ -988,7 +1006,7 @@ public abstract class AbstractPathAssert<S extends AbstractPathAssert<S>> extend
    * </p>
    *
    * <pre><code class="java">
-   * // unixFs is a Unix filesystem
+   * // fs is a Unix filesystem
    *
    * // the following assertion succeeds:
    * assertThat(fs.getPath("/")).hasNoParent();
@@ -1034,13 +1052,13 @@ public abstract class AbstractPathAssert<S extends AbstractPathAssert<S>> extend
    * </p>
    *
    * <pre><code class="java">
-   * // unixFs is a Unix filesystem
+   * // fs is a Unix filesystem
    *
    * // the following assertions succeed:
    * assertThat(fs.getPath("/")).hasNoParentRaw();
    * assertThat(fs.getPath("foo")).hasNoParentRaw();
    *
-   * // the following assertions :
+   * // the following assertions fail:
    * assertThat(fs.getPath("/usr/lib")).hasNoParentRaw();
    * assertThat(fs.getPath("/usr")).hasNoParentRaw();
    * // this one fails as canonicalization is not performed, leading to parent being /usr

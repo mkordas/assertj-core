@@ -22,7 +22,7 @@ import java.nio.file.Path;
  */
 public class ShouldHaveName extends BasicErrorMessageFactory {
 
-  private static final String SHOULD_HAVE_NAME = "%nExpecting%n  <%s>%nto have name:%n  <%s>%nbut had:%n  <%s>.";
+  private static final String SHOULD_HAVE_NAME = "%nExpecting%n  <%s>%nto have name:%n  <%s>%nbut had:%n  <%s>";
 
   public static ShouldHaveName shouldHaveName(File actual, String expectedName) {
     return new ShouldHaveName(actual, expectedName);

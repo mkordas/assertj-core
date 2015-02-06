@@ -17,24 +17,19 @@ import org.assertj.core.util.VisibleForTesting;
 import java.nio.file.Path;
 
 /**
- * Creates an error message indicating that an assertion that verifies that a
- * {@link Path} is a regular file has failed.
+ * Creates an error message indicating that an assertion that verifies that a {@link Path} is a regular file has failed.
  *
  */
-public class ShouldBeRegularFile
-    extends BasicErrorMessageFactory
+public class ShouldBeRegularFile extends BasicErrorMessageFactory
 {
-    @VisibleForTesting
-    public static final String SHOULD_BE_REGULAR_FILE
-        = "%nExpecting path:%n  <%s>%nto be a regular file";
+  @VisibleForTesting
+  public static final String SHOULD_BE_REGULAR_FILE = "%nExpecting path:%n  <%s>%nto be a regular file.";
 
-    public static ErrorMessageFactory shouldBeRegularFile(final Path actual)
-    {
-        return new ShouldBeRegularFile(actual);
-    }
+  public static ErrorMessageFactory shouldBeRegularFile(final Path actual) {
+	return new ShouldBeRegularFile(actual);
+  }
 
-    private ShouldBeRegularFile(final Path actual)
-    {
-        super(SHOULD_BE_REGULAR_FILE, actual);
-    }
+  private ShouldBeRegularFile(final Path actual) {
+	super(SHOULD_BE_REGULAR_FILE, actual);
+  }
 }

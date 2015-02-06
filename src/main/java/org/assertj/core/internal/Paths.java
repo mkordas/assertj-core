@@ -28,6 +28,7 @@ import static org.assertj.core.error.ShouldExist.shouldExist;
 import static org.assertj.core.error.ShouldExist.shouldExistNoFollowLinks;
 import static org.assertj.core.error.ShouldHaveBinaryContent.shouldHaveBinaryContent;
 import static org.assertj.core.error.ShouldHaveContent.shouldHaveContent;
+import static org.assertj.core.error.ShouldHaveEqualContent.shouldHaveEqualContent;
 import static org.assertj.core.error.ShouldHaveName.shouldHaveName;
 import static org.assertj.core.error.ShouldHaveNoParent.shouldHaveNoParent;
 import static org.assertj.core.error.ShouldHaveParent.shouldHaveParent;
@@ -50,7 +51,7 @@ import org.assertj.core.util.VisibleForTesting;
  * Core assertion class for {@link Path} assertions
  */
 public class Paths {
-  
+
   private static final String FAILED_TO_RESOLVE_ARGUMENT_REAL_PATH = "failed to resolve argument real path";
   private static final String FAILED_TO_RESOLVE_ACTUAL_REAL_PATH = "failed to resolve actual real path";
   @VisibleForTesting
@@ -283,16 +284,35 @@ public class Paths {
   }
 
   public void assertHasBinaryContent(AssertionInfo info, Path actual, byte[] expected) {
-    if (expected == null) throw new NullPointerException("The binary content to compare to should not be null");
-    assertIsReadable(info, actual);
-    File actualFile = actual.toFile();
-    try {
+	if (expected == null) throw new NullPointerException("The binary content to compare to should not be null");
+	assertIsReadable(info, actual);
+	File actualFile = actual.toFile();
+	try {
 	  BinaryDiffResult diffResult = binaryDiff.diff(actualFile, expected);
-      if (diffResult.hasNoDiff()) return;
-      throw failures.failure(info, shouldHaveBinaryContent(actualFile, diffResult));
-    } catch (IOException e) {
-      throw new FilesException(format("Unable to verify binary contents of file:<%s>", actualFile), e);
-    }
+	  if (diffResult.hasNoDiff()) return;
+	  throw failures.failure(info, shouldHaveBinaryContent(actualFile, diffResult));
+	} catch (IOException e) {
+	  throw new FilesException(format("Unable to verify binary contents of file:<%s>", actualFile), e);
+	}
+  }
+
+  public void assertHasSameContentAs(AssertionInfo info, Path actual, Path expected) {
+	// @format:off
+	if (expected == null) 
+	  throw new NullPointerException("The given Path to compare actual content to should not be null");
+	if (!nioFilesWrapper.isReadable(expected))
+	  throw new IllegalArgumentException(format("The given Path <%s> to compare actual content to should be readable", expected));
+	// @format:on
+	assertIsReadable(info, actual);
+	File expectedFile = expected.toFile();
+	File actualFile = actual.toFile();
+	try {
+	  List<String> diffs = diff.diff(actualFile, expectedFile);
+	  if (diffs.isEmpty()) return;
+	  throw failures.failure(info, shouldHaveEqualContent(actualFile, expectedFile, diffs));
+	} catch (IOException e) {
+	  throw new FilesException(format("Unable to compare contents of files:<%s> and:<%s>", actualFile, expectedFile), e);
+	}
   }
 
 }
